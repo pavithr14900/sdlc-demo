@@ -1,10 +1,9 @@
 package com.example.leave.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -14,26 +13,34 @@ public class LeaveRequest {
     @GeneratedValue
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    @NotNull
+    @Column(nullable = false)
     @PastOrPresent
     private LocalDate startDate;
 
-    @NotNull
-    @FutureOrPresent
+    @Column(nullable = false)
+    @PastOrPresent
+    @AssertTrue(message = "End date must be after start date")
     private LocalDate endDate;
 
-    @NotNull
     @Column(nullable = false, length = 20)
+    @Pattern(regexp = "SICK|VACATION|PERSONAL", message = "Leave type must be one of: SICK, VACATION, PERSONAL")
+    private String leaveType;
+
+    @Column(nullable = false, length = 20)
+    @Pattern(regexp = "PENDING|APPROVED|REJECTED", message = "Status must be one of: PENDING, APPROVED, REJECTED")
     private String status = "PENDING";
 
-    @Column(updatable = false)
-    private LocalDate createdAt = LocalDate.now();
+    @Column(nullable = false, updatable = false)
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    private LocalDateTime createdAt;
 
-    private LocalDate updatedAt = LocalDate.now();
+    @Column(nullable = false)
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    private LocalDateTime updatedAt;
 
     // Getters and setters omitted for brevity
 }

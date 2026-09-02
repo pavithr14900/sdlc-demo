@@ -19,37 +19,25 @@ public class LeaveRequestController {
 
     @PostMapping
     public ResponseEntity<LeaveRequest> createLeaveRequest(@RequestBody LeaveRequest leaveRequest) {
-        LeaveRequest savedLeaveRequest = leaveRequestService.createLeaveRequest(leaveRequest);
-        return new ResponseEntity<>(savedLeaveRequest, HttpStatus.CREATED);
+        LeaveRequest createdLeaveRequest = leaveRequestService.createLeaveRequest(leaveRequest);
+        return new ResponseEntity<>(createdLeaveRequest, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<LeaveRequest> getLeaveRequestById(@PathVariable UUID id) {
         Optional<LeaveRequest> leaveRequest = leaveRequestService.getLeaveRequestById(id);
-        return leaveRequest.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return leaveRequest.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping
-    public ResponseEntity<List<LeaveRequest>> getAllLeaveRequests() {
-        List<LeaveRequest> leaveRequests = leaveRequestService.getAllLeaveRequests();
-        return ResponseEntity.ok(leaveRequests);
-    }
-
-    @PutMapping("/{id}/approve")
+    @PatchMapping("/{id}/approve")
     public ResponseEntity<LeaveRequest> approveLeaveRequest(@PathVariable UUID id) {
         LeaveRequest approvedLeaveRequest = leaveRequestService.approveLeaveRequest(id);
-        return ResponseEntity.ok(approvedLeaveRequest);
+        return new ResponseEntity<>(approvedLeaveRequest, HttpStatus.OK);
     }
 
-    @PutMapping("/{id}/reject")
+    @PatchMapping("/{id}/reject")
     public ResponseEntity<LeaveRequest> rejectLeaveRequest(@PathVariable UUID id) {
         LeaveRequest rejectedLeaveRequest = leaveRequestService.rejectLeaveRequest(id);
-        return ResponseEntity.ok(rejectedLeaveRequest);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteLeaveRequest(@PathVariable UUID id) {
-        leaveRequestService.deleteLeaveRequest(id);
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(rejectedLeaveRequest, HttpStatus.OK);
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -17,7 +18,8 @@ public class LeaveRequestService {
 
     @Transactional
     public LeaveRequest createLeaveRequest(LeaveRequest leaveRequest) {
-        // Business logic for creating a leave request
+        // Validate leave dates and types
+        validateLeaveRequest(leaveRequest);
         return leaveRequestRepository.save(leaveRequest);
     }
 
@@ -42,8 +44,7 @@ public class LeaveRequestService {
         return leaveRequestRepository.save(leaveRequest);
     }
 
-    @Transactional
-    public void deleteLeaveRequest(UUID id) {
-        leaveRequestRepository.deleteById(id);
+    private void validateLeaveRequest(LeaveRequest leaveRequest) {
+        // Add validation logic here
     }
 }

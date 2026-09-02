@@ -1,37 +1,37 @@
 # Release Notes
 
 ## Version 1.0.0 - Initial Release
-**Release Date**: 2023-10-01  
+**Release Date**: 2023-10-10  
 **Status**: Stable
 
 ### Summary
-This release introduces the initial version of the expense management application for our organization. The application allows employees to submit expenses, managers to approve or reject them, and provides a reporting dashboard for viewing expenses. The application is built using a microservices architecture with a PostgreSQL database, Spring Boot for the backend, and a RESTful API for communication.
+This release introduces the Employee Leave Application, designed to streamline the process of submitting, approving, and tracking leave requests within our organization. The application includes a user-friendly interface for employees to submit leave requests, view their leave balances, and receive notifications about the status of their requests. Managers can approve or reject leave requests, and the system ensures that all leave requests are processed in accordance with company policies.
 
 ### New Features
-- **Expense Submission**: Employees can submit their expenses through the application, which are then stored in the database for further processing. This feature enables employees to easily track and submit their expenses without manual paperwork.
-- **Expense Approval Workflow**: Managers can approve or reject submitted expenses, updating the status accordingly. This feature streamlines the approval process and ensures that expenses are reviewed and processed efficiently.
-- **Reporting Dashboard**: Users can view a list of all expenses and retrieve specific expense details. This feature provides transparency and allows for better financial oversight.
+- **Employee Leave Request Submission**: Employees can submit leave requests through a simple form, specifying the leave type, start date, and end date. This feature enables employees to request leave in a structured and organized manner.
+- **Leave Request Approval Workflow**: Managers can approve or reject leave requests, ensuring that all requests are reviewed and processed according to company policies. This feature provides a clear workflow for leave management.
+- **Leave Balance Retrieval**: Employees can view their leave balances, including the number of days remaining for each leave type. This feature helps employees plan their leave more effectively.
 
 ### Core Capabilities Delivered
-- **Database Schema**: The application includes a PostgreSQL database schema designed to store employee and expense data efficiently.
-- **RESTful API**: A set of RESTful APIs is provided for interacting with the expense management system, including endpoints for submitting, retrieving, updating, and deleting expenses.
-- **Security**: The application implements JWT-based authentication and role-based access control to ensure secure access to the system.
+- **RESTful API Endpoints**: The application provides a set of RESTful API endpoints for leave request submission, approval workflow, and leave balance retrieval. These endpoints enable seamless integration with other systems and provide a flexible interface for accessing leave data.
+- **Database Schema and JPA Entities**: The application uses a PostgreSQL database to store leave requests and employee data. JPA entities are used to map database tables to Java objects, providing a convenient and efficient way to interact with the database.
+- **Business Logic and Workflow**: The application implements business logic for processing leave requests, managing approval workflows, and tracking leave balances. This ensures that all leave requests are handled consistently and accurately.
 
 ### Improvements & Polish
-- **Input Validation**: Custom validation annotations are used to ensure that all input data meets the required criteria, reducing the risk of invalid data being processed.
-- **Rate Limiting**: Rate limiting is implemented to prevent abuse of the API endpoints, ensuring the system remains responsive and available.
-- **UI Refinement**: The user interface has been refined to provide a better user experience, making it easier for employees and managers to interact with the application.
+- **Input Validation**: The application includes comprehensive input validation to ensure that all leave requests are submitted with valid data. This includes validating employee IDs, leave types, start and end dates, and other required fields.
+- **Security**: The application uses Spring Security to implement JWT-based authentication and role-based access control (RBAC). This ensures that only authorized users can access the application and perform specific actions.
+- **UI Refinement**: The user interface has been designed to be intuitive and easy to use, with clear instructions and feedback for employees submitting leave requests.
 
 ### Known Issues & Limitations
-- **Third-Party Integrations**: Integration with third-party services is not yet implemented. This will be addressed in version 1.1.
-- **Performance**: The application currently handles up to 1000 records efficiently, but performance may degrade with larger datasets. Optimizations will be implemented in future versions.
+- **Limited Leave Types**: Currently, the application only supports three leave types: SICK, VACATION, and PERSONAL. Additional leave types will be added in future releases.
+- **Performance**: The application handles up to 1000 leave requests concurrently. Performance may degrade with higher loads, which will be addressed in future optimizations.
 
 ### Breaking Changes
-- **None**: This initial release does not introduce any breaking changes.
+- **None**: This is the initial release, and there are no breaking changes from previous versions.
 
 ### Compatibility
 - **Requires**: Java 11, PostgreSQL 13, Spring Boot 2.5.x
-- **Tested on**: Ubuntu 20.04, Windows 10, Google Chrome, Mozilla Firefox
+- **Tested on**: Windows 10, macOS 11, Ubuntu 20.04, Google Chrome 94, Mozilla Firefox 93, Microsoft Edge 94
 
 ### Upgrade Notes
 To deploy this release:
@@ -43,22 +43,22 @@ To deploy this release:
 6. Verify health: `curl http://localhost:8080/api/health`
 
 ### Contributors
-- **John Doe**: Lead Developer, implemented core features and API endpoints
-- **Jane Smith**: Database Administrator, designed and implemented the database schema
-- **Alice Johnson**: Security Engineer, implemented authentication and authorization
+- **John Doe**: Lead Developer, implemented core business logic and API endpoints.
+- **Jane Smith**: UI/UX Designer, designed the user interface and ensured a seamless user experience.
+- **Alex Johnson**: Security Engineer, implemented authentication and authorization mechanisms.
 
 ### What's Next
 
 #### Planned for Version 1.1
-- **Third-Party Integrations**: Implement integration with third-party services such as payroll and accounting systems.
-- **Performance Improvements**: Optimize database queries and API endpoints to handle larger datasets.
-- **Enhanced Reporting**: Add additional reporting features, such as expense summaries and trend analysis.
+- **Additional Leave Types**: Introduce new leave types such as HOLIDAY and BEREAEMENT.
+- **Leave Request History**: Allow employees to view their leave request history.
+- **Performance Optimization**: Improve application performance to handle higher loads.
 
 #### Future Roadmap
-- **Mobile Application**: Develop a mobile application for expense submission and approval on-the-go.
-- **Machine Learning**: Implement machine learning algorithms to detect and flag suspicious expenses.
+- **Integration with HR System**: Integrate the leave application with the organization's HR system for seamless data synchronization.
+- **Mobile Application**: Develop a mobile application to enable leave request submission and tracking on mobile devices.
 
 ### Feedback & Support
-- **Report issues**: Submit issues on GitHub or via email at support@example.com
-- **Request features**: Submit feature requests on GitHub or via email at support@example.com
-- **Documentation**: See README.md, User Guide, and API Documentation
+- **Report issues**: [GitHub Issues](https://github.com/org/employee-leave-app/issues)
+- **Request features**: [GitHub Issues](https://github.com/org/employee-leave-app/issues)
+- **Documentation**: See [README.md](https://github.com/org/employee-leave-app/blob/main/README.md), [User Guide](https://github.com/org/employee-leave-app/blob/main/docs/user-guide.md), and [API Documentation](https://github.com/org/employee-leave-app/blob/main/docs/api-docs.md)
