@@ -1,20 +1,35 @@
 CREATE TABLE Employee (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR NOT NULL,
-    email VARCHAR NOT NULL UNIQUE
+    email VARCHAR NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE LeaveRequest (
+CREATE TABLE Expense (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    employee_id UUID NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
+    employee_id UUID NOT NULL REFERENCES Employee(id),
+    amount DECIMAL NOT NULL,
+    description VARCHAR NOT NULL,
     status VARCHAR NOT NULL DEFAULT 'PENDING',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (employee_id) REFERENCES Employee(id) ON DELETE CASCADE
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_leave_request_employee_id ON LeaveRequest(employee_id);
-CREATE INDEX idx_leave_request_created_at ON LeaveRequest(created_at);
-CREATE INDEX idx_leave_request_updated_at ON LeaveRequest(updated_at);
+CREATE TABLE Approval (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    expense_id UUID NOT NULL REFERENCES Expense(id),
+    approver_id UUID NOT NULL REFERENCES Employee(id),
+    status VARCHAR NOT NULL DEFAULT 'PENDING',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Report (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    employee_id UUID NOT NULL REFERENCES Employee(id),
+    report_date DATE NOT NULL,
+    total_amount DECIMAL NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

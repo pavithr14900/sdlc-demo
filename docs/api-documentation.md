@@ -3,39 +3,39 @@
 ## Overview
 **Base URL**: `http://localhost:5000` (development) | `https://api.example.com` (production)
 **Response Format**: JSON
-**Authentication**: Bearer token using Spring Security JWT
-**Rate Limits**: 100 requests per minute per user
+**Authentication**: Bearer token using JWT-based authentication with Spring Security
+**Rate Limits**: 100 requests per minute
 
 ## Authentication
 
 ### Bearer Token
 1. Obtain a token by logging in via the `/api/auth/login` endpoint with `username` and `password`.
-2. Include in request headers: `Authorization: Bearer <token>`.
+2. Include the token in request headers: `Authorization: Bearer <token>`.
 3. Token expires in 1 hour; refresh using the `/api/auth/refresh` endpoint.
 
 ### Example Request with Auth
 ```bash
-curl -X GET http://localhost:5000/api/leave-requests \
+curl -X GET http://localhost:5000/api/expenses \
   -H "Authorization: Bearer your_token_here" \
   -H "Content-Type: application/json"
 ```
 
 ## Endpoints
 
-### POST /leave-requests
-Submit a new leave request.
+### POST /api/expenses
+Submit a new expense for approval.
 
 **Request:**
 - **Method**: POST
-- **Path**: `/api/leave-requests`
+- **Path**: `/api/expenses`
 - **Headers**: `Authorization: Bearer <token>`, `Content-Type: application/json`
 - **Request Body**:
   ```json
   {
-    "employeeId": "UUID",
-    "leaveType": "SICK|VACATION|PERSONAL",
-    "startDate": "YYYY-MM-DD",
-    "endDate": "YYYY-MM-DD"
+    "employeeId": "UUID, ID of the employee submitting the expense",
+    "amount": "decimal, amount of the expense",
+    "description": "string, description of the expense",
+    "date": "string, date of the expense in YYYY-MM-DD format"
   }
   ```
 
@@ -43,138 +43,188 @@ Submit a new leave request.
 - **Status 201 (Created)**:
   ```json
   {
-    "id": "UUID",
-    "status": "PENDING"
+    "success": true,
+    "data": {
+      "id": "UUID, ID of the submitted expense",
+      "status": "string, status of the expense (SUBMITTED)"
+    },
+    "message": "Expense submitted successfully"
   }
   ```
 - **Status 400 (Bad Request)**: Missing or invalid required field
 - **Status 401 (Unauthorized)**: Invalid or expired token
-- **Status 403 (Forbidden)**: Insufficient permissions
 - **Status 500 (Server Error)**: Unexpected error
 
 **Example:**
 ```bash
-curl -X POST http://localhost:5000/api/leave-requests \
+curl -X POST http://localhost:5000/api/expenses \
   -H "Authorization: Bearer token" \
   -H "Content-Type: application/json" \
-  -d '{"employeeId":"123e4567-e89b-12d3-a456-426614174000","leaveType":"SICK","startDate":"2023-10-01","endDate":"2023-10-05"}'
+  -d '{"employeeId":"123e4567-e89b-12d3-a456-426614174000","amount":100,"description":"Lunch","date":"2023-10-01"}'
 ```
 
-### GET /leave-requests/{id}
-Retrieve leave request details.
+### GET /api/expenses
+Retrieve all expenses submitted by employees.
 
 **Request:**
 - **Method**: GET
-- **Path**: `/api/leave-requests/{id}`
+- **Path**: `/api/expenses`
 - **Headers**: `Authorization: Bearer <token>`, `Content-Type: application/json`
 
 **Response:**
 - **Status 200 (OK)**:
   ```json
   {
-    "id": "UUID",
-    "employeeId": "UUID",
-    "leaveType": "SICK|VACATION|PERSONAL",
-    "startDate": "YYYY-MM-DD",
-    "endDate": "YYYY-MM-DD",
-    "status": "PENDING|APPROVED|REJECTED"
+    "success": true,
+    "data": [
+      {
+        "id": "UUID, ID of the expense",
+        "employeeId": "UUID, ID of the employee who submitted the expense",
+        "amount": "decimal, amount of the expense",
+        "description": "string, description of the expense",
+        "date": "string, date of the expense",
+        "status": "string, status of the expense (SUBMITTED, APPROVED, REJECTED)"
+      }
+    ],
+    "message": "Expenses retrieved successfully"
   }
   ```
-- **Status 404 (Not Found)**: Record doesn't exist
 - **Status 401 (Unauthorized)**: Invalid or expired token
-- **Status 403 (Forbidden)**: Insufficient permissions
 - **Status 500 (Server Error)**: Unexpected error
 
 **Example:**
 ```bash
-curl -X GET http://localhost:5000/api/leave-requests/123e4567-e89b-12d3-a456-426614174000 \
+curl -X GET http://localhost:5000/api/expenses \
   -H "Authorization: Bearer token" \
   -H "Content-Type: application/json"
 ```
 
-### PATCH /leave-requests/{id}/approve
-Approve a leave request.
-
-**Request:**
-- **Method**: PATCH
-- **Path**: `/api/leave-requests/{id}/approve`
-- **Headers**: `Authorization: Bearer <token>`, `Content-Type: application/json`
-
-**Response:**
-- **Status 200 (OK)**:
-  ```json
-  {
-    "id": "UUID",
-    "status": "APPROVED"
-  }
-  ```
-- **Status 400 (Bad Request)**: Missing or invalid required field
-- **Status 401 (Unauthorized)**: Invalid or expired token
-- **Status 403 (Forbidden)**: Insufficient permissions
-- **Status 404 (Not Found)**: Record doesn't exist
-- **Status 500 (Server Error)**: Unexpected error
-
-**Example:**
-```bash
-curl -X PATCH http://localhost:5000/api/leave-requests/123e4567-e89b-12d3-a456-426614174000/approve \
-  -H "Authorization: Bearer token" \
-  -H "Content-Type: application/json"
-```
-
-### PATCH /leave-requests/{id}/reject
-Reject a leave request.
-
-**Request:**
-- **Method**: PATCH
-- **Path**: `/api/leave-requests/{id}/reject`
-- **Headers**: `Authorization: Bearer <token>`, `Content-Type: application/json`
-
-**Response:**
-- **Status 200 (OK)**:
-  ```json
-  {
-    "id": "UUID",
-    "status": "REJECTED"
-  }
-  ```
-- **Status 400 (Bad Request)**: Missing or invalid required field
-- **Status 401 (Unauthorized)**: Invalid or expired token
-- **Status 403 (Forbidden)**: Insufficient permissions
-- **Status 404 (Not Found)**: Record doesn't exist
-- **Status 500 (Server Error)**: Unexpected error
-
-**Example:**
-```bash
-curl -X PATCH http://localhost:5000/api/leave-requests/123e4567-e89b-12d3-a456-426614174000/reject \
-  -H "Authorization: Bearer token" \
-  -H "Content-Type: application/json"
-```
-
-### GET /leave-balance/{employeeId}
-Get employee leave balance.
+### GET /api/expenses/{id}
+Retrieve a specific expense by its ID.
 
 **Request:**
 - **Method**: GET
-- **Path**: `/api/leave-balance/{employeeId}`
+- **Path**: `/api/expenses/{id}`
 - **Headers**: `Authorization: Bearer <token>`, `Content-Type: application/json`
 
 **Response:**
 - **Status 200 (OK)**:
   ```json
   {
-    "employeeId": "UUID",
-    "leaveType": "SICK|VACATION|PERSONAL",
-    "balance": "integer"
+    "success": true,
+    "data": {
+      "id": "UUID, ID of the expense",
+      "employeeId": "UUID, ID of the employee who submitted the expense",
+      "amount": "decimal, amount of the expense",
+      "description": "string, description of the expense",
+      "date": "string, date of the expense",
+      "status": "string, status of the expense (SUBMITTED, APPROVED, REJECTED)"
+    },
+    "message": "Expense retrieved successfully"
   }
   ```
-- **Status 404 (Not Found)**: Record doesn't exist
 - **Status 401 (Unauthorized)**: Invalid or expired token
-- **Status 403 (Forbidden)**: Insufficient permissions
+- **Status 404 (Not Found)**: Expense not found
 - **Status 500 (Server Error)**: Unexpected error
 
 **Example:**
 ```bash
-curl -X GET http://localhost:5000/api/leave-balance/123e4567-e89b-12d3-a456-426614174000 \
+curl -X GET http://localhost:5000/api/expenses/123e4567-e89b-12d3-a456-426614174000 \
+  -H "Authorization: Bearer token" \
+  -H "Content-Type: application/json"
+```
+
+### PUT /api/expenses/{id}/approve
+Approve an expense by its ID.
+
+**Request:**
+- **Method**: PUT
+- **Path**: `/api/expenses/{id}/approve`
+- **Headers**: `Authorization: Bearer <token>`, `Content-Type: application/json`
+
+**Response:**
+- **Status 200 (OK)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": "UUID, ID of the expense",
+      "status": "string, status of the expense (APPROVED)"
+    },
+    "message": "Expense approved successfully"
+  }
+  ```
+- **Status 400 (Bad Request)**: Invalid request
+- **Status 401 (Unauthorized)**: Invalid or expired token
+- **Status 404 (Not Found)**: Expense not found
+- **Status 500 (Server Error)**: Unexpected error
+
+**Example:**
+```bash
+curl -X PUT http://localhost:5000/api/expenses/123e4567-e89b-12d3-a456-426614174000/approve \
+  -H "Authorization: Bearer token" \
+  -H "Content-Type: application/json"
+```
+
+### PUT /api/expenses/{id}/reject
+Reject an expense by its ID.
+
+**Request:**
+- **Method**: PUT
+- **Path**: `/api/expenses/{id}/reject`
+- **Headers**: `Authorization: Bearer <token>`, `Content-Type: application/json`
+
+**Response:**
+- **Status 200 (OK)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": "UUID, ID of the expense",
+      "status": "string, status of the expense (REJECTED)"
+    },
+    "message": "Expense rejected successfully"
+  }
+  ```
+- **Status 400 (Bad Request)**: Invalid request
+- **Status 401 (Unauthorized)**: Invalid or expired token
+- **Status 404 (Not Found)**: Expense not found
+- **Status 500 (Server Error)**: Unexpected error
+
+**Example:**
+```bash
+curl -X PUT http://localhost:5000/api/expenses/123e4567-e89b-12d3-a456-426614174000/reject \
+  -H "Authorization: Bearer token" \
+  -H "Content-Type: application/json"
+```
+
+### GET /api/expenses/report
+Generate an expense report.
+
+**Request:**
+- **Method**: GET
+- **Path**: `/api/expenses/report`
+- **Headers**: `Authorization: Bearer <token>`, `Content-Type: application/json`
+
+**Response:**
+- **Status 200 (OK)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "totalExpenses": "decimal, total amount of all expenses",
+      "approvedExpenses": "decimal, total amount of approved expenses",
+      "rejectedExpenses": "decimal, total amount of rejected expenses"
+    },
+    "message": "Expense report generated successfully"
+  }
+  ```
+- **Status 401 (Unauthorized)**: Invalid or expired token
+- **Status 500 (Server Error)**: Unexpected error
+
+**Example:**
+```bash
+curl -X GET http://localhost:5000/api/expenses/report \
   -H "Authorization: Bearer token" \
   -H "Content-Type: application/json"
 ```
@@ -183,16 +233,16 @@ curl -X GET http://localhost:5000/api/leave-balance/123e4567-e89b-12d3-a456-4266
 
 | Status | Code | Meaning | When It Occurs |
 |--------|------|---------|----------------|
-| 400 | BAD_REQUEST | Invalid input | Missing or invalid required field |
+| 400 | BAD_REQUEST | Invalid input | Submitting an expense with missing or invalid fields |
 | 401 | UNAUTHORIZED | Invalid credentials | Token missing or expired |
 | 403 | FORBIDDEN | Access denied | User lacks required role |
-| 404 | NOT_FOUND | Resource not found | Record doesn't exist |
+| 404 | NOT_FOUND | Resource not found | Expense or report not found |
 | 409 | CONFLICT | Duplicate or state conflict | Record already exists |
 | 429 | RATE_LIMIT | Too many requests | Exceeded rate limit |
 | 500 | INTERNAL_ERROR | Server error | Unexpected error, check logs |
 
 ## Rate Limits and Quotas
-- **100 requests per minute per user**: Exceeding this limit will result in a 429 RATE_LIMIT response.
+- **100 requests per minute**: Exceeding this limit will result in a 429 RATE_LIMIT error.
 
 ## Data Types and Formats
 - **Timestamps**: ISO 8601 format (e.g., `2026-01-15T10:30:00Z`)

@@ -1,126 +1,116 @@
 # User Guide
 
 ## Overview
-The employee leave application is designed for employees within our organization to submit leave requests, view their leave balances, and track the status of their leave requests. This application aims to streamline the leave management process, ensuring that employees can easily request leave and managers can efficiently approve or reject these requests. With this tool, employees can manage their leave more effectively, and HR can maintain accurate records of leave balances and approvals.
+The expense management application is designed for employees and finance managers within an organization to streamline the process of submitting, approving, and reporting on expenses. This application solves the problem of manual expense tracking and approval, allowing for a more efficient and transparent process. With this application, users can submit expense claims, managers can approve or reject these claims, and finance teams can generate detailed expense reports.
 
 ## Getting Started
-To get started with the employee leave application, follow these steps:
-
-1. **Login**: Access the application and log in using your employee credentials.
-2. **Submit Leave Request**: Navigate to the leave request section and fill out the necessary details.
-3. **Verify Submission**: After submitting a leave request, you should see a confirmation message indicating that your request has been received.
+1. **Login**: Access the application and log in using your credentials.
+2. **Navigate to Expense Submission**: Go to the dashboard and click on the "Submit Expense" button.
+3. **Verify Success**: Upon successful login, you should see the dashboard with options to submit, view, and manage expenses.
 
 ## User Roles and Permissions
 
 ### Employee
-- **Capabilities**: Submit leave requests, view leave balance, and check the status of their leave requests.
-- **Typical workflows**: Submit a leave request, check the status of a leave request, view leave balance.
-- **Restrictions**: Cannot approve or reject leave requests.
+- **Capabilities**: Submit expense claims, view submitted expenses, generate personal expense reports.
+- **Typical workflows**: Submit a new expense, view the status of submitted expenses, generate a monthly expense report.
+- **Restrictions**: Cannot approve or reject other employees' expenses.
 
 ### Manager
-- **Capabilities**: Approve or reject leave requests submitted by employees.
-- **Typical workflows**: Review a leave request, approve or reject the request, view employee leave balances.
-- **Restrictions**: Cannot modify leave request details.
+- **Capabilities**: Approve or reject expense claims, view all submitted expenses, generate department expense reports.
+- **Typical workflows**: Review and approve submitted expenses, reject invalid expenses, generate reports for team expenses.
+- **Restrictions**: Cannot modify other managers' actions or access sensitive employee data.
 
-### HR
-- **Capabilities**: Manage employee data, view and manage leave balances, and oversee the leave approval process.
-- **Typical workflows**: Add or update employee information, approve or reject leave requests, view overall leave statistics.
-- **Restrictions**: Cannot submit leave requests on behalf of employees.
+### Finance Manager
+- **Capabilities**: Oversee all expense claims, generate organization-wide expense reports, manage user roles and permissions.
+- **Typical workflows**: Review all submitted expenses, approve or reject claims, generate annual expense reports, manage user access.
+- **Restrictions**: Cannot change the application's core functionalities or access raw database records directly.
 
 ## Core Workflows
 
-### Submit Leave Request
-This workflow allows employees to request leave by specifying the type of leave, start date, and end date.
+### Submit an Expense
+This workflow is used when an employee needs to claim an expense.
 
 **Steps:**
-1. Navigate to the "Leave Requests" section by clicking on the menu.
-2. Click the "Submit Leave Request" button to open the form.
-3. Enter the following fields with values like:
+1. Navigate to the "Submit Expense" section by clicking the button on the dashboard.
+2. Click the "New Expense" button to open the expense submission form.
+3. Enter fields with values like:
    - `employeeId`: `1`
-   - `leaveType`: `SICK`
-   - `startDate`: `2023-10-01`
-   - `endDate`: `2023-10-05`
-4. Click the "Submit" button to send the request.
-5. **Expected outcome**: A confirmation message stating that the leave request has been submitted.
+   - `amount`: `100`
+   - `description`: `Lunch`
+   - `date`: `2023-10-01`
+4. Click the "Submit" button to submit the expense.
+5. **Expected outcome**: A success message indicating the expense has been submitted.
 
 **Common mistakes:**
-- **Incorrect leave type**: Ensure you select a valid leave type (SICK, VACATION, PERSONAL). If incorrect, correct the leave type and resubmit.
-- **Invalid date range**: Ensure the start date is not in the past and the end date is after the start date. If invalid, correct the dates and resubmit.
+- **Invalid amount**: Ensure the amount is a positive number. Fix by entering a valid amount.
+- **Invalid date format**: Ensure the date is in YYYY-MM-DD format. Fix by entering a valid date.
 
-### View Leave Balance
-This workflow allows employees to check their remaining leave balance.
-
-**Steps:**
-1. Navigate to the "Leave Balance" section by clicking on the menu.
-2. Click the "View Balance" button to display your leave balance.
-3. **Expected outcome**: A list of leave types and their respective balances.
-
-**Tips:**
-- Regularly check your leave balance to plan your leave requests accordingly.
-- Contact HR if you notice any discrepancies in your leave balance.
-
-### Approve or Reject Leave Request
-This workflow allows managers to approve or reject leave requests submitted by employees.
+### Approve an Expense
+This workflow is used when a manager needs to approve an employee's expense claim.
 
 **Steps:**
-1. Navigate to the "Leave Requests" section by clicking on the menu.
-2. Click on the leave request you want to approve or reject.
-3. Click the "Approve" or "Reject" button to change the status.
-4. **Expected outcome**: The leave request status should update to "APPROVED" or "REJECTED".
+1. Navigate to the "Expense Approval" section by clicking the link on the dashboard.
+2. Click on the expense to be approved.
+3. Click the "Approve" button to approve the expense.
+4. **Expected outcome**: The expense status should change to "APPROVED".
 
 **Tips:**
-- Review leave requests promptly to avoid delays in the leave approval process.
-- Provide feedback to employees if their leave request is rejected.
+- Use the search function to quickly find specific expenses.
+- Check the approval history for previous actions on the expense.
+
+### Generate an Expense Report
+This workflow is used when a finance manager needs to generate a report on expenses.
+
+**Steps:**
+1. Navigate to the "Reports" section by clicking the link on the dashboard.
+2. Click the "Generate Report" button.
+3. Select the date range and click "Generate".
+4. **Expected outcome**: A detailed report showing total expenses, approved expenses, and rejected expenses.
+
+**Tips:**
+- Use filters to narrow down the report to specific departments or employees.
+- Export the report in CSV format for further analysis.
 
 ## Data Management
 
 ### Creating Records
-To create a new leave request, employees must fill out the leave request form with the required details: `employeeId`, `leaveType`, `startDate`, and `endDate`. The form will validate these fields to ensure they meet the specified criteria.
+To create a new expense record, navigate to the "Submit Expense" section, fill in the required fields (employeeId, amount, description, date), and click "Submit". Required fields must be filled out, and the amount must be a positive number.
 
 ### Editing Records
-Employees cannot edit their leave requests directly. If an error is found, they must contact HR to make the necessary changes. Managers can approve or reject leave requests but cannot modify the request details.
+Editing records is not supported in this application to maintain audit integrity. If an error is found in a submitted expense, it should be rejected and resubmitted with corrections.
 
 ### Deleting Records
-Leave requests cannot be deleted once submitted. If a request needs to be voided, HR must manually update the status to "CANCELLED".
+Deleting records is not supported. Instead, expenses can be rejected if they are found to be invalid. This ensures a complete audit trail.
 
 ### Filtering and Search
-Users can filter leave requests by employee ID, leave type, and status. The search functionality allows users to find specific leave requests quickly.
+Use the search bar at the top of the expense list to find specific expenses by employee name, date, or amount. Filters can be applied to view expenses by status (e.g., pending, approved, rejected).
 
 ## Reports and Exports
-HR can generate reports on leave requests, approvals, and rejections. These reports can be exported in CSV and PDF formats for further analysis.
+Expense reports can be generated from the "Reports" section. Reports can be filtered by date range, employee, and status. Reports can be exported in CSV format for further analysis.
 
 ## Frequently Asked Questions
 
-**Q: Can I submit a leave request for a past date?**
-A: No, you cannot submit a leave request for a past date. The start date must be in the future.
+**Q: Can I submit an expense after the month-end?**
+A: No, expenses can only be submitted within the current month. Submit any pending expenses before the month-end.
 
-**Q: What should I do if my leave request is rejected?**
-A: If your leave request is rejected, you can contact your manager for feedback and resubmit the request with necessary changes.
+**Q: What should I do if my expense is rejected?**
+A: Review the rejection reason, correct any errors, and resubmit the expense.
 
-**Q: Can I request leave during a weekend or holiday?**
-A: Yes, you can request leave during weekends or holidays. The system will automatically adjust the leave balance accordingly.
+**Q: Can I view expenses submitted by other employees?**
+A: Yes, managers and finance managers can view all submitted expenses. Employees can only view their own expenses.
 
 ## Troubleshooting
 
 ### Common Issues
-- **Leave request not submitted**: Ensure all required fields are filled out correctly. If the issue persists, contact support.
-- **Unable to approve/reject leave request**: Ensure you have the necessary permissions. If the issue persists, contact HR.
-- **Incorrect leave balance**: Ensure all leave requests are correctly processed. If the issue persists, contact HR.
+- **Expense not submitting**: Ensure all required fields are filled out correctly. Fix by entering valid data.
+- **Unable to approve expense**: Ensure you have the correct role and permissions. Fix by checking your role settings.
+- **Report not generating**: Ensure the date range is correctly set. Fix by selecting a valid date range.
 
 ### Performance Tips
-- Ensure your internet connection is stable when submitting leave requests.
-- Clear your browser cache if you experience any loading issues.
+- Use the search and filter functions to quickly find specific data.
+- Regularly clear your browser cache to ensure the application runs smoothly.
 
 ## Best Practices
-- Submit leave requests well in advance to allow sufficient time for approval.
-- Regularly check your leave balance to plan your leave effectively.
-- Contact HR if you notice any discrepancies in your leave balance.
-
-## Getting Help
-- **In-app help**: Click the? icon for contextual help.
-- **Documentation**: See the API Documentation and README for technical details.
-- **Contact support**: Email support@example.com with:
-  - What you were trying to do
-  - Error message (if any)
-  - Screenshots or logs
-  - Your role and username
+- Submit expenses as soon as possible after the expense occurs.
+- Regularly review and approve submitted expenses to avoid delays.
+- Use the reporting feature to monitor expense trends and manage budgets effectively.

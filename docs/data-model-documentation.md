@@ -2,73 +2,121 @@
 
 ## Overview
 
-The system manages the following core domains:
-- Employee: Responsible for storing employee details and managing leave requests.
-- LeaveRequest: Responsible for tracking leave requests submitted by employees.
+The expense management application manages the following core domains:
+- Employee: Responsible for submitting and approving expenses, cardinality is 1:N with Expense.
+- Expense: Represents the expenses submitted by employees, cardinality is 1:N with Employee and 1:1 with Approval.
 
 ## Entity Relationship Diagram
 
 ```
-[Employee]
+[Employee] 
     |
     | 1:N
     |
-[LeaveRequest]
+[Expense] ---- 1:1 ---- [Approval]
+    |
+    | 1:N
+    |
+[Report]
 ```
 
 ## Entities
 
 ### Employee
-**Purpose**: Represents an employee within the organization, managing their personal details and leave balance.
-
+**Purpose**: Represents an employee who can submit and approve expenses.
 **Table/Collection Name**: `Employee`
 
 **Fields:**
 | Field Name | Type | Required | Constraints | Description |
 |------------|------|----------|-------------|-------------|
 | `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
-| `name` | VARCHAR | Yes | Max 255 chars | Employee's full name |
-| `email` | VARCHAR | Yes | Max 255 chars, unique | Employee's email address |
-| `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
-| `updated_at` | TIMESTAMP | Yes | Auto-set on create/update | Last modification time |
+| `name` | String | Yes | Max 255 chars | Employee name |
+| `email` | String | Yes | Max 255 chars, unique | Employee email |
+| `created_at` | Timestamp | Yes | Auto-set on create | Record creation time |
+| `updated_at` | Timestamp | Yes | Auto-set on create/update | Last modification time |
 
 **Relationships:**
-- Has many `LeaveRequest` (1:N): Inverse via `LeaveRequest.employee_id`
+- Has many `Expense` (1:N): Inverse via `Expense.employee_id`
+- Has many `Approval` (1:N): Inverse via `Approval.approver_id`
+- Has many `Report` (1:N): Inverse via `Report.employee_id`
 
 **Validation Rules:**
 - `name` must be non-empty
 - `email` must be non-empty and unique across all records
 
-### LeaveRequest
-**Purpose**: Represents a leave request submitted by an employee, tracking its status and dates.
-
-**Table/Collection Name**: `LeaveRequest`
+### Expense
+**Purpose**: Represents an expense submitted by an employee.
+**Table/Collection Name**: `Expense`
 
 **Fields:**
 | Field Name | Type | Required | Constraints | Description |
 |------------|------|----------|-------------|-------------|
 | `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
-| `employee_id` | UUID | Yes | Foreign key to `Employee.id` | Employee who submitted the request |
-| `start_date` | DATE | Yes | Must not be in the past | Start date of the leave |
-| `end_date` | DATE | Yes | Must be after `start_date` | End date of the leave |
-| `status` | VARCHAR | Yes | Must be one of "PENDING", "APPROVED", "REJECTED" | Current status of the leave request |
-| `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
-| `updated_at` | TIMESTAMP | Yes | Auto-set on create/update | Last modification time |
+| `employee_id` | UUID | Yes | Foreign key to Employee | Employee who submitted the expense |
+| `amount` | Decimal | Yes | Min 0 | Expense amount |
+| `description` | String | Yes | Max 255 chars | Expense description |
+| `status` | String | Yes | 'PENDING', 'APPROVED', 'REJECTED' | Expense status |
+| `created_at` | Timestamp | Yes | Auto-set on create | Record creation time |
+| `updated_at` | Timestamp | Yes | Auto-set on create/update | Last modification time |
+
+**Relationships:**
+- Belongs to `Employee` (N:1): Foreign key `employee_id` references `Employee.id`
+- Has one `Approval` (1:1): Inverse via `Approval.expense_id`
+
+**Validation Rules:**
+- `amount` must be greater than or equal to 0
+- `status` must be one of 'PENDING', 'APPROVED', 'REJECTED'
+
+### Approval
+**Purpose**: Represents the approval process for an expense.
+**Table/Collection Name**: `Approval`
+
+**Fields:**
+| Field Name | Type | Required | Constraints | Description |
+|------------|------|----------|-------------|-------------|
+| `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
+| `expense_id` | UUID | Yes | Foreign key to Expense | Expense being approved |
+| `approver_id` | UUID | Yes | Foreign key to Employee | Employee who approved the expense |
+| `status` | String | Yes | 'PENDING', 'APPROVED', 'REJECTED' | Approval status |
+| `created_at` | Timestamp | Yes | Auto-set on create | Record creation time |
+| `updated_at` | Timestamp | Yes | Auto-set on create/update | Last modification time |
+
+**Relationships:**
+- Belongs to `Expense` (N:1): Foreign key `expense_id` references `Expense.id`
+- Belongs to `Employee` (N:1): Foreign key `approver_id` references `Employee.id`
+
+**Validation Rules:**
+- `status` must be one of 'PENDING', 'APPROVED', 'REJECTED'
+
+### Report
+**Purpose**: Represents a report generated by an employee.
+**Table/Collection Name**: `Report`
+
+**Fields:**
+| Field Name | Type | Required | Constraints | Description |
+|------------|------|----------|-------------|-------------|
+| `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
+| `employee_id` | UUID | Yes | Foreign key to Employee | Employee who generated the report |
+| `report_date` | Date | Yes | | Date of the report |
+| `total_amount` | Decimal | Yes | | Total expense amount |
+| `created_at` | Timestamp | Yes | Auto-set on create | Record creation time |
+| `updated_at` | Timestamp | Yes | Auto-set on create/update | Last modification time |
 
 **Relationships:**
 - Belongs to `Employee` (N:1): Foreign key `employee_id` references `Employee.id`
 
 **Validation Rules:**
-- `start_date` must be a valid date and not in the past
-- `end_date` must be a valid date and after `start_date`
-- `status` must be one of "PENDING", "APPROVED", "REJECTED"
+- `report_date` must be a valid date
 
 ## Relationships and Constraints
 
 ### Foreign Keys
 | From Entity | Field | To Entity | Field | Cardinality | Delete Behavior |
 |-------------|-------|-----------|-------|-------------|-----------------|
-| `LeaveRequest` | `employee_id` | `Employee` | `id` | N:1 | CASCADE |
+| `Employee` | `id` | `Expense` | `employee_id` | 1:N | CASCADE |
+| `Employee` | `id` | `Approval` | `approver_id` | 1:N | CASCADE |
+| `Employee` | `id` | `Report` | `employee_id` | 1:N | CASCADE |
+| `Expense` | `id` | `Approval` | `expense_id` | 1:1 | CASCADE |
 
 ### Unique Constraints
 - `Employee(email)`: Ensures no duplicate email addresses
@@ -76,31 +124,32 @@ The system manages the following core domains:
 ## Data Validation Rules
 
 **Business Rules:**
-- `LeaveRequest.start_date`: Must not be in the past, otherwise return a validation error.
-- `LeaveRequest.end_date`: Must be after `start_date`, otherwise return a validation error.
-- `LeaveRequest.status`: Must be one of "PENDING", "APPROVED", "REJECTED", otherwise return a validation error.
+- `Employee.email` must be unique: Violation results in a 400 error with a message "Email already exists."
+- `Expense.amount` must be greater than or equal to 0: Violation results in a 400 error with a message "Amount must be greater than or equal to 0."
+- `Approval.status` must be one of 'PENDING', 'APPROVED', 'REJECTED': Violation results in a 400 error with a message "Invalid approval status."
 
 **Format Rules:**
-- `Employee.email`: Must match the email format regex `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+- `Employee.email`: Must match the regex `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+- `Expense.date`: Must be in the format `YYYY-MM-DD`
 
 ## Data Lifecycle
 
 ### Creation
-- A new `Employee` is created when a new user registers.
-- Default `status` for `LeaveRequest` is `PENDING`.
-- `created_by` is automatically set to the current user
+- A new `Employee` is created when a user signs up.
+- Default `status` for `Expense` is `PENDING`.
+- `created_by` is automatically set to the current user.
 
 ### Updates
 - `Employee.email` can only be updated by the employee themselves.
-- `updated_at` is automatically updated on any modification to an `Employee` or `LeaveRequest`.
+- `updated_at` is automatically updated on any modification.
 
 ### Archival / Soft Delete
-- Records are not archived but can be marked as deleted by setting the `status` to `DELETED`.
+- Records are not archived but can be marked as deleted by setting the `status` to 'DELETED'.
 
 ## Indexes
 - Primary key: `id`
-- Foreign keys: `employee_id`
-- Search fields: `name`, `email`
+- Foreign keys: `employee_id`, `expense_id`, `approver_id`
+- Search fields: `name`, `email`, `description`
 
 ## Example Records
 
@@ -111,21 +160,47 @@ The system manages the following core domains:
   "id": "550e8400-e29b-41d4-a716-446655440000",
   "name": "John Doe",
   "email": "john.doe@example.com",
-  "created_at": "2026-01-15T10:30:00Z",
-  "updated_at": "2026-01-15T10:30:00Z"
+  "created_at": "2023-10-01T10:30:00Z",
+  "updated_at": "2023-10-01T10:30:00Z"
 }
 ```
 
-### LeaveRequest
+### Expense
 
 ```json
 {
-  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "id": "550e8400-e29b-41d4-a716-446655440001",
   "employee_id": "550e8400-e29b-41d4-a716-446655440000",
-  "start_date": "2026-01-15",
-  "end_date": "2026-01-20",
+  "amount": 100.00,
+  "description": "Lunch",
   "status": "PENDING",
-  "created_at": "2026-01-15T10:30:00Z",
-  "updated_at": "2026-01-15T10:30:00Z"
+  "created_at": "2023-10-01T10:30:00Z",
+  "updated_at": "2023-10-01T10:30:00Z"
+}
+```
+
+### Approval
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440002",
+  "expense_id": "550e8400-e29b-41d4-a716-446655440001",
+  "approver_id": "550e8400-e29b-41d4-a716-446655440003",
+  "status": "APPROVED",
+  "created_at": "2023-10-02T10:30:00Z",
+  "updated_at": "2023-10-02T10:30:00Z"
+}
+```
+
+### Report
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440004",
+  "employee_id": "550e8400-e29b-41d4-a716-446655440000",
+  "report_date": "2023-10-01",
+  "total_amount": 1000.00,
+  "created_at": "2023-10-03T10:30:00Z",
+  "updated_at": "2023-10-03T10:30:00Z"
 }
 ```
