@@ -1,7 +1,8 @@
 package com.example.leavemanagement.service;
 
 import com.example.leavemanagement.dto.LeaveRequestDto;
-import com.example.leavemanagement.exception.LeaveRequestNotFoundException;
+import com.example.leavemanagement.exception.LeaveRequestException;
+import com.example.leavemanagement.mapper.LeaveRequestMapper;
 import com.example.leavemanagement.model.LeaveRequest;
 import com.example.leavemanagement.repository.LeaveRequestRepository;
 import com.example.leavemanagement.service.impl.LeaveRequestServiceImpl;
@@ -10,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.modelmapper.ModelMapper;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -20,8 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-public class LeaveRequestServiceTest {
+class LeaveRequestServiceTest {
 
     @InjectMocks
     private LeaveRequestServiceImpl leaveRequestService;
@@ -30,58 +28,56 @@ public class LeaveRequestServiceTest {
     private LeaveRequestRepository leaveRequestRepository;
 
     @Mock
-    private ModelMapper modelMapper;
+    private LeaveRequestMapper leaveRequestMapper;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void testSubmitLeaveRequest_Success() {
+    void submitLeaveRequest_happyPath() {
         LeaveRequestDto leaveRequestDto = new LeaveRequestDto();
         leaveRequestDto.setEmployeeId("1");
         leaveRequestDto.setLeaveType("SICK");
-        leaveRequestDto.setStartDate(LocalDate.of(2023, 12, 1));
-        leaveRequestDto.setEndDate(LocalDate.of(2023, 12, 5));
+        leaveRequestDto.setStartDate(LocalDate.of(2023, 10, 1));
+        leaveRequestDto.setEndDate(LocalDate.of(2023, 10, 5));
 
         LeaveRequest leaveRequest = new LeaveRequest();
         leaveRequest.setId("1");
+        leaveRequest.setStatus("PENDING");
 
-        when(modelMapper.map(leaveRequestDto, LeaveRequest.class)).thenReturn(leaveRequest);
+        when(leaveRequestMapper.toEntity(leaveRequestDto)).thenReturn(leaveRequest);
         when(leaveRequestRepository.save(any(LeaveRequest.class))).thenReturn(leaveRequest);
-        when(modelMapper.map(leaveRequest, LeaveRequestDto.class)).thenReturn(leaveRequestDto);
+        when(leaveRequestMapper.toDto(leaveRequest)).thenReturn(leaveRequestDto);
 
         LeaveRequestDto result = leaveRequestService.submitLeaveRequest(leaveRequestDto);
 
         assertNotNull(result);
         assertEquals("1", result.getId());
         assertEquals("PENDING", result.getStatus());
+        verify(leaveRequestRepository, times(1)).save(any(LeaveRequest.class));
     }
 
     @Test
-    public void testSubmitLeaveRequest_InvalidEmployeeId_ThrowsException() {
+    void submitLeaveRequest_invalidEmployeeId() {
         LeaveRequestDto leaveRequestDto = new LeaveRequestDto();
-        leaveRequestDto.setEmployeeId("invalid");
+        leaveRequestDto.setEmployeeId(null);
         leaveRequestDto.setLeaveType("SICK");
-        leaveRequestDto.setStartDate(LocalDate.of(2023, 12, 1));
-        leaveRequestDto.setEndDate(LocalDate.of(2023, 12, 5));
+        leaveRequestDto.setStartDate(LocalDate.of(2023, 10, 1));
+        leaveRequestDto.setEndDate(LocalDate.of(2023, 10, 5));
 
-        assertThrows(LeaveRequestNotFoundException.class, () -> {
-            leaveRequestService.submitLeaveRequest(leaveRequestDto);
-        });
+        assertThrows(LeaveRequestException.class, () -> leaveRequestService.submitLeaveRequest(leaveRequestDto));
     }
 
     @Test
-    public void testSubmitLeaveRequest_InvalidLeaveType_ThrowsException() {
+    void submitLeaveRequest_endDateBeforeStartDate() {
         LeaveRequestDto leaveRequestDto = new LeaveRequestDto();
         leaveRequestDto.setEmployeeId("1");
-        leaveRequestDto.setLeaveType("INVALID");
-        leaveRequestDto.setStartDate(LocalDate.of(2023, 12, 1));
-        leaveRequestDto.setEndDate(LocalDate.of(2023, 12, 5));
+        leaveRequestDto.setLeaveType("SICK");
+        leaveRequestDto.setStartDate(LocalDate.of(2023, 10, 5));
+        leaveRequestDto.setEndDate(LocalDate.of(2023, 10, 1));
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            leaveRequestService.submitLeaveRequest(leaveRequestDto);
-        });
+        assertThrows(LeaveRequestException.class, () -> leaveRequestService.submitLeaveRequest(leaveRequestDto));
     }
 }

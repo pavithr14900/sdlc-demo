@@ -2,24 +2,21 @@
 
 ## Overview
 
-The system manages the following core domains:
-- Employee: Responsible for storing employee details and their leave requests.
-- LeaveRequest: Responsible for managing leave requests submitted by employees.
+The employee leave application manages data related to employees and their leave requests within the organization. This system ensures that leave requests are tracked, approved, and managed efficiently. The core domains managed by the application are:
+
+- **Employee**: Responsible for storing employee information and their leave history.
+- **LeaveRequest**: Responsible for managing leave requests, including their status and dates.
 
 ## Entity Relationship Diagram
 
 ```
-[Employee]
-    |
-    | 1:N
-    |
-[LeaveRequest]
+[Employee] ---- 1:N ---- [LeaveRequest]
 ```
 
 ## Entities
 
 ### Employee
-**Purpose**: Represents an employee within the organization who can submit leave requests.
+**Purpose**: Represents an employee within the organization, including their personal information and leave history.
 
 **Table/Collection Name**: `Employee`
 
@@ -27,8 +24,8 @@ The system manages the following core domains:
 | Field Name | Type | Required | Constraints | Description |
 |------------|------|----------|-------------|-------------|
 | `id` | UUID | Yes | Primary key, auto-generated | Unique identifier for the employee |
-| `name` | VARCHAR | Yes | Max 255 chars | Employee name |
-| `email` | VARCHAR | Yes | Max 255 chars, unique | Employee email |
+| `name` | VARCHAR | Yes | Max 255 chars, unique | Employee's full name |
+| `email` | VARCHAR | Yes | Max 255 chars, unique | Employee's email address |
 | `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
 | `updated_at` | TIMESTAMP | Yes | Auto-set on create/update | Last modification time |
 
@@ -36,11 +33,11 @@ The system manages the following core domains:
 - Has many `LeaveRequest` (1:N): Inverse via `LeaveRequest.employee_id`
 
 **Validation Rules:**
-- `name` must be non-empty
+- `name` must be non-empty and unique across all records
 - `email` must be non-empty and unique across all records
 
 ### LeaveRequest
-**Purpose**: Represents a leave request submitted by an employee.
+**Purpose**: Represents a leave request made by an employee, including the leave type, start and end dates, and status.
 
 **Table/Collection Name**: `LeaveRequest`
 
@@ -48,11 +45,11 @@ The system manages the following core domains:
 | Field Name | Type | Required | Constraints | Description |
 |------------|------|----------|-------------|-------------|
 | `id` | UUID | Yes | Primary key, auto-generated | Unique identifier for the leave request |
-| `employee_id` | UUID | Yes | Foreign key | Employee who requested leave |
-| `leave_type` | VARCHAR | Yes | Max 255 chars | Type of leave requested |
-| `start_date` | DATE | Yes | Must not be in the past | Start date of leave |
-| `end_date` | DATE | Yes | Must be after start_date | End date of leave |
-| `status` | VARCHAR | Yes | 'PENDING', 'APPROVED', 'REJECTED', 'CANCELED' | Leave request status |
+| `employee_id` | UUID | Yes | Foreign key to Employee.id | Reference to the Employee table |
+| `leave_type` | VARCHAR | Yes | Must be one of "SICK", "VACATION", "PERSONAL" | Type of leave requested |
+| `start_date` | DATE | Yes | Must be a valid date | Start date of the leave |
+| `end_date` | DATE | Yes | Must be a valid date, must be after start_date | End date of the leave |
+| `status` | VARCHAR | Yes | Must be one of "PENDING", "APPROVED", "REJECTED" | Current status of the leave request |
 | `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
 | `updated_at` | TIMESTAMP | Yes | Auto-set on create/update | Last modification time |
 
@@ -60,11 +57,9 @@ The system manages the following core domains:
 - Belongs to `Employee` (N:1): Foreign key `employee_id` references `Employee.id`
 
 **Validation Rules:**
-- `employee_id` must be a valid employee ID
-- `leave_type` must be one of the predefined leave types
-- `start_date` must be a valid date, must not be in the past
-- `end_date` must be a valid date, must be after `start_date`
-- `status` must be one of the predefined statuses
+- `leave_type` must be one of "SICK", "VACATION", "PERSONAL"
+- `start_date` must be a valid date
+- `end_date` must be a valid date and must be after `start_date`
 
 ## Relationships and Constraints
 
@@ -79,9 +74,8 @@ The system manages the following core domains:
 ## Data Validation Rules
 
 **Business Rules:**
-- `leave_type` must be one of the predefined leave types: 'SICK', 'VACATION', 'MATERNITY', 'PATERNITY'.
-- `start_date` must be a valid date and must not be in the past.
-- `end_date` must be a valid date and must be after `start_date`.
+- `leave_type` must be one of "SICK", "VACATION", "PERSONAL": If not, return a validation error.
+- `start_date` must be before `end_date`: If not, return a validation error.
 
 **Format Rules:**
 - `email`: Must match the regex `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
@@ -90,20 +84,20 @@ The system manages the following core domains:
 
 ### Creation
 - A new `LeaveRequest` is created when an employee submits a leave request.
-- Default `status` is `PENDING`.
-- `created_by` is automatically set to the current user.
+- Default `status` is `PENDING`
+- `created_by` is automatically set to the current user
 
 ### Updates
-- `LeaveRequest.status` can only be updated by an authorized user.
-- `updated_at` is automatically updated on any modification.
+- `LeaveRequest.status` can only be updated by an authorized user (e.g., manager or admin)
+- `updated_at` is automatically updated on any modification
 
 ### Archival / Soft Delete
-- Records are not archived but can be marked as `CANCELED`.
+- Records are not archived but can be marked as `REJECTED` or `CANCELED`
 
 ## Indexes
 - Primary key: `id`
 - Foreign keys: `employee_id`
-- Search fields: `email`
+- Search fields: `name`, `email` (for common queries)
 
 ## Example Records
 

@@ -3,14 +3,14 @@
 ## Overview
 **Base URL**: `http://localhost:5000` (development) | `https://api.example.com` (production)
 **Response Format**: JSON
-**Authentication**: Bearer token
+**Authentication**: Bearer token (JWT)
 **Rate Limits**: 100 requests per minute
 
 ## Authentication
 
 ### Bearer Token
-1. Obtain a token by logging in through the `/auth/login` endpoint with `username` and `password`.
-2. Include in request headers: `Authorization: Bearer <token>`.
+1. Obtain a token by logging in through the `/auth/login` endpoint.
+2. Include in request headers: `Authorization: Bearer <token>`
 3. Token expires in 1 hour; refresh using the `/auth/refresh` endpoint.
 
 ### Example Request with Auth
@@ -34,8 +34,8 @@ Submit a new leave request.
   {
     "employeeId": "1",
     "leaveType": "SICK",
-    "startDate": "2023-12-01",
-    "endDate": "2023-12-05"
+    "startDate": "2023-10-01",
+    "endDate": "2023-10-05"
   }
   ```
 
@@ -45,7 +45,7 @@ Submit a new leave request.
   {
     "success": true,
     "data": {
-      "id": 1,
+      "id": "1",
       "status": "PENDING"
     },
     "message": "Leave request submitted successfully"
@@ -54,18 +54,18 @@ Submit a new leave request.
 - **Status 400 (Bad Request)**: Missing or invalid required field
 - **Status 401 (Unauthorized)**: Invalid or expired token
 - **Status 403 (Forbidden)**: Insufficient permissions
-- **Status 409 (Conflict)**: Duplicate leave request
+- **Status 500 (Server Error)**: Unexpected error
 
 **Example:**
 ```bash
 curl -X POST http://localhost:5000/api/leave-requests \
   -H "Authorization: Bearer token" \
   -H "Content-Type: application/json" \
-  -d '{"employeeId":"1","leaveType":"SICK","startDate":"2023-12-01","endDate":"2023-12-05"}'
+  -d '{"employeeId":"1","leaveType":"SICK","startDate":"2023-10-01","endDate":"2023-10-05"}'
 ```
 
 ### GET /api/leave-requests/{id}
-Retrieve a leave request by ID.
+Retrieve leave request details.
 
 **Request:**
 - **Method**: GET
@@ -78,20 +78,21 @@ Retrieve a leave request by ID.
   {
     "success": true,
     "data": {
-      "id": 1,
-      "employeeId": 1,
+      "id": "1",
+      "employeeId": "1",
       "leaveType": "SICK",
-      "startDate": "2023-12-01",
-      "endDate": "2023-12-05",
-      "status": "PENDING"
+      "startDate": "2023-10-01",
+      "endDate": "2023-10-05",
+      "status": "APPROVED"
     },
-    "message": "Leave request retrieved successfully"
+    "message": "Leave request details retrieved successfully"
   }
   ```
 - **Status 400 (Bad Request)**: Missing or invalid required field
 - **Status 401 (Unauthorized)**: Invalid or expired token
 - **Status 403 (Forbidden)**: Insufficient permissions
 - **Status 404 (Not Found)**: Leave request not found
+- **Status 500 (Server Error)**: Unexpected error
 
 **Example:**
 ```bash
@@ -101,7 +102,7 @@ curl -X GET http://localhost:5000/api/leave-requests/1 \
 ```
 
 ### GET /api/leave-requests
-List all leave requests.
+List all leave requests for an employee.
 
 **Request:**
 - **Method**: GET
@@ -115,12 +116,12 @@ List all leave requests.
     "success": true,
     "data": [
       {
-        "id": 1,
-        "employeeId": 1,
+        "id": "1",
+        "employeeId": "1",
         "leaveType": "SICK",
-        "startDate": "2023-12-01",
-        "endDate": "2023-12-05",
-        "status": "PENDING"
+        "startDate": "2023-10-01",
+        "endDate": "2023-10-05",
+        "status": "APPROVED"
       }
     ],
     "message": "Leave requests retrieved successfully"
@@ -129,6 +130,8 @@ List all leave requests.
 - **Status 400 (Bad Request)**: Missing or invalid required field
 - **Status 401 (Unauthorized)**: Invalid or expired token
 - **Status 403 (Forbidden)**: Insufficient permissions
+- **Status 404 (Not Found)**: Leave requests not found
+- **Status 500 (Server Error)**: Unexpected error
 
 **Example:**
 ```bash
@@ -151,7 +154,7 @@ Approve a leave request.
   {
     "success": true,
     "data": {
-      "id": 1,
+      "id": "1",
       "status": "APPROVED"
     },
     "message": "Leave request approved successfully"
@@ -161,6 +164,8 @@ Approve a leave request.
 - **Status 401 (Unauthorized)**: Invalid or expired token
 - **Status 403 (Forbidden)**: Insufficient permissions
 - **Status 404 (Not Found)**: Leave request not found
+- **Status 409 (Conflict)**: Conflicting leave request
+- **Status 500 (Server Error)**: Unexpected error
 
 **Example:**
 ```bash
@@ -183,7 +188,7 @@ Reject a leave request.
   {
     "success": true,
     "data": {
-      "id": 1,
+      "id": "1",
       "status": "REJECTED"
     },
     "message": "Leave request rejected successfully"
@@ -193,6 +198,8 @@ Reject a leave request.
 - **Status 401 (Unauthorized)**: Invalid or expired token
 - **Status 403 (Forbidden)**: Insufficient permissions
 - **Status 404 (Not Found)**: Leave request not found
+- **Status 409 (Conflict)**: Conflicting leave request
+- **Status 500 (Server Error)**: Unexpected error
 
 **Example:**
 ```bash
@@ -215,7 +222,7 @@ Cancel a leave request.
   {
     "success": true,
     "data": {
-      "id": 1,
+      "id": "1",
       "status": "CANCELED"
     },
     "message": "Leave request canceled successfully"
@@ -225,6 +232,8 @@ Cancel a leave request.
 - **Status 401 (Unauthorized)**: Invalid or expired token
 - **Status 403 (Forbidden)**: Insufficient permissions
 - **Status 404 (Not Found)**: Leave request not found
+- **Status 409 (Conflict)**: Conflicting leave request
+- **Status 500 (Server Error)**: Unexpected error
 
 **Example:**
 ```bash
@@ -237,16 +246,17 @@ curl -X DELETE http://localhost:5000/api/leave-requests/1 \
 
 | Status | Code | Meaning | When It Occurs |
 |--------|------|---------|----------------|
-| 400 | BAD_REQUEST | Invalid input | Submitting a leave request with missing or invalid fields |
+| 400 | BAD_REQUEST | Invalid input | Submitting leave request with missing or invalid fields |
 | 401 | UNAUTHORIZED | Invalid credentials | Token missing or expired |
 | 403 | FORBIDDEN | Access denied | User lacks required role |
-| 404 | NOT_FOUND | Resource not found | Leave request not found |
-| 409 | CONFLICT | Duplicate or state conflict | Leave request already exists |
+| 404 | NOT_FOUND | Resource not found | Leave request or employee not found |
+| 409 | CONFLICT | Duplicate or state conflict | Record already exists or conflicting state |
 | 429 | RATE_LIMIT | Too many requests | Exceeded rate limit |
 | 500 | INTERNAL_ERROR | Server error | Unexpected error, check logs |
 
 ## Rate Limits and Quotas
-- **100 requests per minute**: Exceeding this limit will result in a 429 Too Many Requests response.
+- **100 requests per minute**: Exceeding this limit will result in a 429 RATE_LIMIT response.
+- **1000 requests per hour**: Exceeding this limit will result in temporary IP blocking.
 
 ## Data Types and Formats
 - **Timestamps**: ISO 8601 format (e.g., `2026-01-15T10:30:00Z`)
@@ -255,7 +265,10 @@ curl -X DELETE http://localhost:5000/api/leave-requests/1 \
 - **Enums**: Specific values listed in request/response examples
 
 ## Pagination (if applicable)
-This API does not support pagination.
+- Use `?page=1&limit=20` query parameters
+- Response includes `total`, `page`, `limit`, `data` array
+- Default page size: 20, max: 100
 
 ## SDK Examples
-No SDKs are provided for this API.
+- [Java SDK](https://github.com/example/java-sdk)
+- [Python SDK](https://github.com/example/python-sdk)
