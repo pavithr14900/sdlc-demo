@@ -1,38 +1,39 @@
-import React, { useState } from 'react';
-
-interface LeaveRequestFormProps {
-  onSubmit: (leaveRequest: LeaveRequest) => void;
-}
+import React, { useState } from'react';
 
 interface LeaveRequest {
+  id: string;
+  employeeId: string;
   leaveType: string;
   startDate: string;
   endDate: string;
-  reason: string;
+  status: string;
 }
 
-const LeaveRequestPanel: React.FC<LeaveRequestFormProps> = ({ onSubmit }) => {
-  const [leaveType, setLeaveType] = useState<string>('');
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
-  const [reason, setReason] = useState<string>('');
+const LeaveRequestPanel: React.FC = () => {
+  const [leaveRequest, setLeaveRequest] = useState<LeaveRequest>({
+    id: '',
+    employeeId: '',
+    leaveType: '',
+    startDate: '',
+    endDate: '',
+    status: ''
+  });
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    const leaveRequest: LeaveRequest = {
-      leaveType,
-      startDate,
-      endDate,
-      reason,
-    };
-    onSubmit(leaveRequest);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setLeaveRequest({...leaveRequest, [name]: value });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle form submission here
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <label>Leave Type:</label>
-        <select value={leaveType} onChange={(e) => setLeaveType(e.target.value)}>
+        <label>Leave Type</label>
+        <select name="leaveType" value={leaveRequest.leaveType} onChange={handleChange}>
           <option value="">Select Leave Type</option>
           <option value="SICK">Sick Leave</option>
           <option value="VACATION">Vacation Leave</option>
@@ -40,18 +41,18 @@ const LeaveRequestPanel: React.FC<LeaveRequestFormProps> = ({ onSubmit }) => {
         </select>
       </div>
       <div>
-        <label>Start Date:</label>
-        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        <label>Start Date</label>
+        <input type="date" name="startDate" value={leaveRequest.startDate} onChange={handleChange} />
       </div>
       <div>
-        <label>End Date:</label>
-        <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+        <label>End Date</label>
+        <input type="date" name="endDate" value={leaveRequest.endDate} onChange={handleChange} />
       </div>
       <div>
-        <label>Reason:</label>
-        <textarea value={reason} onChange={(e) => setReason(e.target.value)}></textarea>
+        <label>Reason</label>
+        <textarea name="reason" />
       </div>
-      <button type="submit">Submit Request</button>
+      <button type="submit">Submit Leave Request</button>
     </form>
   );
 };

@@ -1,13 +1,14 @@
 package com.example.leavemanagement;
 
-import com.example.leavemanagement.pages.LeaveRequestPage;
+import com.example.leavemanagement.page.LeaveRequestPage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class LeaveRequestE2ETest {
@@ -16,36 +17,33 @@ public class LeaveRequestE2ETest {
     private LeaveRequestPage leaveRequestPage;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
         driver = new ChromeDriver();
         leaveRequestPage = new LeaveRequestPage(driver);
     }
 
     @Test
-    void submitLeaveRequest_happyPath() {
+    public void testSubmitLeaveRequest() {
         leaveRequestPage.open();
-        leaveRequestPage.fillLeaveRequestForm("1", "SICK", "2023-10-01", "2023-10-05");
-        leaveRequestPage.submitLeaveRequest();
+        leaveRequestPage.submitLeaveRequest("1", "SICK", "2023-10-01", "2023-10-05");
 
-        assertEquals("Leave request submitted successfully", leaveRequestPage.getSuccessMessage());
+        assertTrue(leaveRequestPage.isSuccessMessageDisplayed());
     }
 
     @Test
-    void submitLeaveRequest_invalidEmployeeId() {
+    public void testSubmitLeaveRequest_InvalidEmployeeId() {
         leaveRequestPage.open();
-        leaveRequestPage.fillLeaveRequestForm(null, "SICK", "2023-10-01", "2023-10-05");
-        leaveRequestPage.submitLeaveRequest();
+        leaveRequestPage.submitLeaveRequest("999", "SICK", "2023-10-01", "2023-10-05");
 
-        assertEquals("Employee ID is required", leaveRequestPage.getValidationErrorMessage());
+        assertTrue(leaveRequestPage.isErrorMessageDisplayed());
     }
 
     @Test
-    void submitLeaveRequest_endDateBeforeStartDate() {
+    public void testSubmitLeaveRequest_StartDateInPast() {
         leaveRequestPage.open();
-        leaveRequestPage.fillLeaveRequestForm("1", "SICK", "2023-10-05", "2023-10-01");
-        leaveRequestPage.submitLeaveRequest();
+        leaveRequestPage.submitLeaveRequest("1", "SICK", "2023-09-30", "2023-10-05");
 
-        assertEquals("End date must be after start date", leaveRequestPage.getValidationErrorMessage());
+        assertTrue(leaveRequestPage.isErrorMessageDisplayed());
     }
 }

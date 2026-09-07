@@ -1,39 +1,38 @@
 # README / Setup Guide
 
 ## Overview
-This application is designed to manage employee leave requests within an organization. It allows employees to submit leave requests, view their leave history, and managers to approve or reject these requests. The core benefits include streamlined leave management, improved transparency, and reduced administrative overhead. The target users are employees and managers within the organization.
+This application is an employee leave management system designed to streamline the process of submitting, approving, and tracking leave requests within an organization. It provides a web-based interface for employees to submit leave requests and view their leave status. The system ensures that leave requests are processed efficiently and securely, adhering to organizational policies.
 
 ## Key Features
-- Employees can submit leave requests with details such as leave type, start date, and end date.
-- Managers can approve or reject leave requests.
-- Employees can view their leave history and current leave balance.
+- **Leave Request Submission**: Employees can submit leave requests through a user-friendly web interface, specifying the leave type, start date, and end date.
+- **Leave Status Tracking**: Employees can view the status of their leave requests, including pending, approved, and rejected statuses.
+- **Leave Balance Monitoring**: Employees can check their remaining leave balance for different leave types.
 
 ## Prerequisites
-- Java 11+
-- PostgreSQL 12+
-- Node.js 16+
-- npm 8+
-- Hardware/resource requirements: Minimum 2GB RAM, 1 CPU core
+- **Java 11+**
+- **PostgreSQL 13+**
+- **Node.js 16+**
+- **npm 8+**
+- **Docker (optional for local development)**
+- **Linux/Mac/Windows**
 
 ## Project Structure
-The repository layout is as follows:
-- `backend/`: Contains the backend code, including REST controllers, service classes, and repository interfaces. Key frameworks used are Spring Boot and JPA.
-- `frontend/`: Contains the frontend code, including React components for the user interface. Key frameworks used are React and Redux.
-- `shared/`: Contains shared utilities and configurations.
-- `docs/`: Contains documentation, including API documentation and user guides.
+The repository is structured as follows:
+- **backend/**: Contains the server-side code, including RESTful APIs, business logic, and database interactions. Key frameworks include Spring Boot for the backend framework and JPA for database access.
+- **frontend/**: Contains the client-side code, including the web interface for submitting and viewing leave requests. Key frameworks include React for the frontend framework and Axios for API communication.
+- **shared/**: Contains shared utilities and configurations used by both the frontend and backend.
+- **docs/**: Contains documentation, including API documentation and user guides.
 
 ## Installation & Setup
 
 ### Backend Setup
 1. Clone the repository: `git clone <url>`
-2. Navigate to the project: `cd project-name`
+2. Navigate to the project: `cd employee-leave-management`
 3. Create virtual environment: `python -m venv venv`
 4. Activate: `source venv/bin/activate` (Linux/Mac) or `venv\Scripts\activate` (Windows)
-5. Install dependencies: `pip install -r requirements.txt`
-6. Configure PostgreSQL database by setting the following environment variables:
-   - `SPRING_DATASOURCE_URL`: `jdbc:postgresql://localhost:5432/leave_management`
-   - `SPRING_DATASOURCE_USERNAME`: `your_username`
-   - `SPRING_DATASOURCE_PASSWORD`: `your_password`
+5. Install dependencies: `pip install -r backend/requirements.txt`
+6. Set up PostgreSQL database: Ensure PostgreSQL is running and create a database named `leave_management`.
+7. Configure environment variables: Copy `.env.example` to `.env` and update with your database credentials and JWT secret.
 
 ### Frontend Setup
 1. Navigate to frontend: `cd frontend`
@@ -43,67 +42,70 @@ The repository layout is as follows:
 ## Configuration
 
 ### Required Environment Variables
-- `JWT_SECRET`: Secret key for JWT token signing, format: string, example value: `your_jwt_secret`
-- `JWT_EXPIRATION`: Expiration time for JWT tokens in milliseconds, format: integer, example value: `3600000`
+- **DB_HOST**: The hostname of the PostgreSQL database (e.g., `localhost`).
+- **DB_PORT**: The port number of the PostgreSQL database (e.g., `5432`).
+- **DB_NAME**: The name of the PostgreSQL database (e.g., `leave_management`).
+- **DB_USER**: The username for the PostgreSQL database (e.g., `leave_user`).
+- **DB_PASSWORD**: The password for the PostgreSQL database.
+- **JWT_SECRET**: A secret key for signing JWT tokens (e.g., `my_secret_key`).
 
 ### Optional Environment Variables
-- `PORT` (default: `5000`): Port on which the backend server runs, format: integer, effect if changed: server runs on specified port
+- **PORT** (default: `5000`): The port number on which the backend server will run.
 
 ## Running the Application
 
 ### Starting the Backend
-1. Ensure virtual environment is activated
-2. Set environment variables: `export JWT_SECRET=your_jwt_secret`
-3. Start server: `python app.py`
-4. Verify: Backend is running on http://localhost:5000
+1. Ensure virtual environment is activated.
+2. Set environment variables: `export DB_HOST=localhost`, `export DB_PORT=5432`, etc.
+3. Start server: `python backend/app.py`
+4. Verify: Backend is running on http://localhost:5000.
 
 ### Starting the Frontend
 1. Navigate to frontend directory: `cd frontend`
 2. Start dev server: `npm run dev`
-3. Open browser: http://localhost:5173 (or displayed URL)
-4. Verify: UI loads and connects to backend
+3. Open browser: http://localhost:3000 (or displayed URL)
+4. Verify: UI loads and connects to backend.
 
 ## Verification Checklist
-- [ ] Backend health check responds at GET /api/health with 200 OK
-- [ ] Frontend loads without console errors
-- [ ] Basic workflow completes end-to-end (e.g., employee submits a leave request and manager approves it)
-- [ ] API endpoints respond with expected data format
+- [ ] Backend health check responds at GET /api/health with 200 OK.
+- [ ] Frontend loads without console errors.
+- [ ] Basic workflow completes end-to-end (e.g., submitting and approving a leave request).
+- [ ] API endpoints respond with expected data format.
 
 ## Troubleshooting
 
 ### Backend Issues
-- **Port already in use**: Change PORT env var or kill process on port 5000
-- **Module not found**: Run `pip install -r requirements.txt` again
-- **Database connection error**: Verify connection string in config, check service is running
-- **Authentication error**: Verify API keys/tokens in.env are correct and not expired
+- **Port already in use**: Change PORT env var or kill process on port 5000.
+- **Module not found**: Run `pip install -r backend/requirements.txt` again.
+- **Database connection error**: Verify connection string in .env, check service is running.
+- **Authentication error**: Verify API keys/tokens in.env are correct and not expired.
 
 ### Frontend Issues
-- **Blank page or won't load**: Check browser console for errors, ensure backend is running
-- **API connection error**: Verify backend URL in config, check CORS settings
-- **Module resolution error**: Delete node_modules and run `npm install` again
-- **Build fails**: Ensure Node.js version matches requirements, clear cache: `npm cache clean --force`
+- **Blank page or won't load**: Check browser console for errors, ensure backend is running.
+- **API connection error**: Verify backend URL in config, check CORS settings.
+- **Module resolution error**: Delete node_modules and run `npm install` again.
+- **Build fails**: Ensure Node.js version matches requirements, clear cache: `npm cache clean --force`.
 
 ## Common Workflows
 
 ### Submit a Leave Request
-1. Navigate to the leave request form.
-2. Fill in the required fields: employee ID, leave type, start date, and end date.
-3. Click the "Submit" button.
-4. Verify: Leave request is submitted successfully and a confirmation message is displayed.
+1. Navigate to the leave request submission page.
+2. Fill in the leave request form with employee ID, leave type, start date, and end date.
+3. Click submit.
+4. Verify: A new leave request is created with status "PENDING".
 
 ### Approve a Leave Request
-1. Navigate to the leave requests list.
-2. Click on the "Approve" button for the leave request to be approved.
-3. Verify: Leave request status is updated to "APPROVED" and a confirmation message is displayed.
+1. Navigate to the leave request details page.
+2. Click the approve button.
+3. Verify: The leave request status is updated to "APPROVED".
 
 ## Deployment Notes
-For production deployment, consider the following:
-- Use a secrets management service to store sensitive information such as database credentials and JWT secret.
-- Configure load balancing and scaling for the backend server.
-- Set up a CI/CD pipeline for automated testing and deployment.
+- Ensure environment variables are set correctly in the production environment.
+- Use a secure method for managing secrets, such as environment variables or a secrets manager.
+- Consider using a load balancer and scaling the application based on traffic.
 
 ## Getting Help
-- Check logs: Backend logs in console, frontend logs in browser DevTools
-- Review error message and stack trace for clues
-- Check environment variables are set correctly
-- Refer to the API Documentation and User Guide for more details
+- Check logs: Backend logs in console, frontend logs in browser DevTools.
+- Review error message and stack trace for clues.
+- Check environment variables are set correctly.
+- Refer to the API Documentation and User Guide for more details.

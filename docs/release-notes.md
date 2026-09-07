@@ -1,60 +1,63 @@
 # Release Notes
 
 ## Version 1.0.0 - Initial Release
-**Release Date**: 2023-10-10  
+**Release Date**: 2023-10-01  
 **Status**: Stable
 
 ### Summary
-This release introduces the Employee Leave Application, enabling employees to submit leave requests and view their leave history. The application includes a RESTful API for managing leave requests, a PostgreSQL database for data storage, and robust security measures to ensure secure access.
+This release introduces the Employee Leave Application for our organization. The application allows employees to submit leave requests, view their leave status, and managers to approve or reject leave requests. It also provides a feature to check the leave balance of employees.
 
 ### New Features
-- **Leave Request Submission**: Employees can submit leave requests through the API, specifying the leave type, start date, and end date. This feature allows employees to request leave efficiently.
-- **Leave Request Approval**: Managers can approve or reject leave requests via the API, ensuring a streamlined approval process.
-- **Leave History**: Employees can view their leave history, including approved, rejected, and canceled leave requests.
+- **Leave Request Submission**: Employees can submit leave requests through the web interface, specifying the leave type, start date, and end date. This feature enables employees to formally request time off.
+- **Leave Request Approval/Rejection**: Managers can approve or reject leave requests, updating the status accordingly. This feature streamlines the leave approval process.
+- **Leave Balance Retrieval**: Employees can view their leave balance for different leave types. This feature helps employees keep track of their available leave.
 
 ### Core Capabilities Delivered
-- **RESTful API for Leave Management**: Provides endpoints for submitting, approving, rejecting, and canceling leave requests.
-- **Database Schema for Employee and Leave Data**: Includes tables for Employee and LeaveRequest entities, ensuring structured data storage.
-- **Security Mechanisms**: Implements OAuth2 with JWT tokens for secure API access and role-based access control (RBAC) to restrict endpoint access.
+- **Web-based Interface**: A user-friendly web interface for employees to interact with the leave application.
+- **RESTful APIs**: Comprehensive APIs for leave request submission, retrieval, approval, rejection, and leave balance checking.
+- **Database Integration**: A PostgreSQL database to store and retrieve leave data securely.
 
 ### Improvements & Polish
-- **Input Validation**: All incoming requests are validated using Spring's built-in validation annotations to ensure data integrity.
-- **SQL Injection Prevention**: Uses parameterized queries and JPA to prevent SQL injection.
-- **UI Refinement**: Improved user interface for better user experience.
+- **Role-based Access Control**: Implemented to ensure only authorized users can access specific endpoints.
+- **Input Validation**: Used Spring's built-in validation annotations and custom validators to ensure data integrity.
+- **UI Refinement**: Improved the user interface for better usability and accessibility.
 
 ### Known Issues & Limitations
-- **Overlapping Leave Requests**: Handling overlapping leave requests is not yet implemented. This will be addressed in version 1.1.
-- **Performance**: The application currently handles up to 1000 records efficiently.
+- **Limited Leave Types**: Currently supports only three leave types (SICK, VACATION, PERSONAL). Will be expanded in future releases.
+- **Performance**: Handles up to 1000 records efficiently. Performance may degrade with higher volumes.
+- **No Leave Carry Forward**: Leave balance does not carry forward to the next year. This feature will be added in future releases.
 
 ### Breaking Changes
-- **None**
+- **None**: This is the initial release with no breaking changes.
 
 ### Compatibility
-- Requires: Java 11, PostgreSQL 13, Node.js 14
-- Tested on: Windows 10, macOS 11, Ubuntu 20.04
+- **Requires**: Java 11, PostgreSQL 13, Spring Boot 2.5.x
+- **Tested on**: Windows 10, macOS 11, Ubuntu 20.04, Chrome 94, Firefox 92, Edge 94
 
 ### Upgrade Notes
 To deploy this release:
 1. Back up the database
 2. Pull the latest code: `git pull origin main`
-3. Install/update dependencies: `mvn install`
-4. Run migrations if any: `flyway migrate`
+3. Install/update dependencies: `mvn clean install`
+4. Run migrations if any: `mvn liquibase:update`
 5. Restart services
-6. Verify health: `curl http://localhost:8080/api/health`
+6. Verify health: `curl http://localhost:8080/actuator/health`
 
 ### Contributors
-- **John Doe**: Implemented the API endpoints and service classes.
-- **Jane Smith**: Designed the database schema and implemented the repository interfaces.
+- **John Doe**: Lead Developer, implemented core business logic and APIs.
+- **Jane Smith**: UI/UX Designer, designed the web interface and improved user experience.
+- **Alex Johnson**: Security Expert, implemented authentication and authorization mechanisms.
 
 ### What's Next
 
 #### Planned for Version 1.1
-- **Overlapping Leave Requests**: Implement logic to handle overlapping leave requests.
+- **Leave Carry Forward**: Implement leave balance carry forward to the next year.
+- **Additional Leave Types**: Add support for more leave types.
 - **Performance Improvement**: Optimize database queries for better performance.
 
 #### Future Roadmap
-- **Integration with HR Systems**: Integrate with HR systems for employee data and notifications.
-- **Mobile Application**: Develop a mobile application for leave request submission and approval.
+- **Mobile App**: Develop a mobile application for leave request submission and status checking.
+- **Integration with Payroll System**: Automate leave deductions from employee salaries.
 
 ### Feedback & Support
 - Report issues: [GitHub Issues](https://github.com/example/leave-management/issues)

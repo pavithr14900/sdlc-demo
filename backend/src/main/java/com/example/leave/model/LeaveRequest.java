@@ -19,24 +19,21 @@ public class LeaveRequest {
     private Employee employee;
 
     @NotNull
-    @Size(min = 1, max = 20)
-    private String leaveType;
-
-    @NotNull
     @PastOrPresent
     private LocalDate startDate;
 
     @NotNull
+    @PastOrPresent
     private LocalDate endDate;
 
     @NotNull
     @Size(min = 1, max = 20)
-    private String status = "PENDING";
+    private String status;
 
     @Column(updatable = false)
-    private LocalDate createdAt;
+    private LocalDate createdAt = LocalDate.now();
 
-    private LocalDate updatedAt;
+    private LocalDate updatedAt = LocalDate.now();
 
     // Getters and setters omitted for brevity
 }

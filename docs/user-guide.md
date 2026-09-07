@@ -1,120 +1,268 @@
+REQUIREMENT
+===========
+Build an employee leave application for our organization.
+
+ARCHITECTURE
+============
+## 4. ARCHITECTURE DESIGN
+
+### Architecture and Diagram Summary
+
+- **Frontend Layer**: A web-based interface for employees to submit leave requests and view their leave status.
+- **API Layer**: RESTful APIs to handle requests from the frontend and communicate with the application services.
+- **Application Services Layer**: Core business logic for processing leave requests, approvals, and balance tracking.
+- **Persistence Layer**: Database schema and data access objects to store and retrieve leave data.
+- **Security Layer**: Authentication and authorization mechanisms to ensure only authorized users can access the system.
+- **External Systems**: Integration with existing HR systems for user data and leave policy enforcement.
+
+### Code Design
+
+- `com.example.leave.web`: Controllers and request mappings for the API.
+- `com.example.leave.service`: Service classes implementing business logic.
+- `com.example.leave.repository`: JPA repositories for database access.
+- `com.example.leave.model`: Domain objects representing leave requests and employees.
+- `com.example.leave.security`: Security configurations and user details service.
+- `com.example.leave.validation`: Custom validation annotations and validators.
+
+### Implementation Plan
+
+#### Phase 1: Setup
+**Tasks:**
+- Initialize the project with Spring Boot
+- Configure PostgreSQL database
+- Set up Spring Security
+**Dependencies:** None
+**Expected Outcome:** A running Spring Boot application with a configured database and basic security setup.
+
+#### Phase 2: Database
+**Tasks:**
+- Design and create database schema
+- Implement JPA entities and repositories
+**Dependencies:** Phase 1
+**Expected Outcome:** A database schema ready for leave data storage and retrieval.
+
+#### Phase 3: Domain
+**Tasks:**
+- Define domain models for leave requests and employees
+- Implement domain logic for leave balance calculations
+**Dependencies:** Phase 2
+**Expected Outcome:** Domain models and logic for managing leave requests and employee data.
+
+#### Phase 4: Business Logic
+**Tasks:**
+- Implement service layer for leave request processing
+- Define leave approval workflow
+**Dependencies:** Phase 3
+**Expected Outcome:** Complete business logic for leave request submission and approval.
+
+#### Phase 5: APIs
+**Tasks:**
+- Develop RESTful APIs for leave requests
+- Implement API validation and error handling
+**Dependencies:** Phase 4
+**Expected Outcome:** Functional APIs for leave request submission and status checking.
+
+#### Phase 6: Security and Deployment
+**Tasks:**
+- Configure role-based access control
+- Prepare application for deployment
+**Dependencies:** Phase 5
+**Expected Outcome:** A secure application ready for production deployment.
+
+API DESIGN
+==========
+## 5. API DESIGN
+
+### Endpoints
+
+| Method | Path | Purpose | Request Body | Response Body | Success Status | Error Statuses |
+|--------|------|---------|--------------|---------------|----------------|----------------|
+| POST   | /leave-requests | Submit a new leave request | `{"employeeId":1,"leaveType":"SICK","startDate":"2023-10-01","endDate":"2023-10-05"}` | `{"id":1,"status":"PENDING"}` | 201 | 400, 404, 500 |
+| GET    | /leave-requests/{id} | Retrieve a leave request by ID | N/A | `{"id":1,"employeeId":1,"leaveType":"SICK","startDate":"2023-10-01","endDate":"2023-10-05","status":"PENDING"}` | 200 | 404 |
+| PATCH  | /leave-requests/{id}/approve | Approve a leave request | N/A | `{"id":1,"status":"APPROVED"}` | 200 | 400, 404, 403, 500 |
+| PATCH  | /leave-requests/{id}/reject | Reject a leave request | N/A | `{"id":1,"status":"REJECTED"}` | 200 | 400, 404, 403, 500 |
+| GET    | /leave-balance/{employeeId} | Get leave balance for an employee | N/A | `{"employeeId":1,"leaveType":"SICK","balance":10}` | 200 | 404 |
+
+### Validation and Error Handling
+
+#### Field Level Validation Rules
+
+- `employeeId`: Required, must be a valid employee ID.
+- `leaveType`: Required, must be one of ["SICK", "VACATION", "PERSONAL"].
+- `startDate`: Required, must be a valid date, must not be in the past.
+- `endDate`: Required, must be a valid date, must be after startDate.
+- `status`: Must be one of ["PENDING", "APPROVED", "REJECTED"].
+
+#### Standard Error Response Envelope
+
+```json
+{
+  "timestamp": "2023-10-01T12:34:56.789Z",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Invalid leave request.",
+  "details": "The leave request contains invalid data."
+}
+```
+
+#### Business Failures to HTTP Status Codes
+
+| Business Failure | HTTP Status Code |
+|------------------|------------------|
+| Invalid request data | 400 |
+| Leave request not found | 404 |
+| Unauthorized access | 403 |
+| Internal server error | 500 |
+
+DATA MODEL
+==========
+## 6. DATA MODEL
+
+### Model
+
+| Table         | Column   | Data Type | Nullable | Key | Default | Description                           |
+|---------------|-----------|-----------|----------|-----|---------|---------------------------------------|
+| Employee      | id        | UUID      | No       | PK  | -       | Unique identifier for the employee    |
+| Employee      | name      | VARCHAR   | No       | -   | -       | Employee's full name                  |
+| Employee      | email     | VARCHAR   | No       | -   | -       | Employee's email address              |
+| LeaveRequest  | id        | UUID      | No       | PK  | -       | Unique identifier for the leave request |
+| LeaveRequest  | employee_id | UUID     | No       | FK  | -       | Employee who requested the leave      |
+| LeaveRequest  | start_date | DATE      | No       | -   | -       | Start date of the leave               |
+| LeaveRequest  | end_date   | DATE      | No       | -   | -       | End date of the leave                 |
+| LeaveRequest  | status    | VARCHAR   | No       | -   | -       | Status of the leave request           |
+| LeaveRequest  | created_at| TIMESTAMP | No       | -   | CURRENT_TIMESTAMP | Creation timestamp                   |
+| LeaveRequest  | updated_at| TIMESTAMP | No       | -   | CURRENT_TIMESTAMP | Last update timestamp                |
+
+### ER Diagram
+
+```json
+{
+  "entities": [
+    { "name": "Employee", "fields": ["id", "name", "email"] },
+    { "name": "LeaveRequest", "fields": ["id", "employee_id", "start_date", "end_date", "status", "created_at", "updated_at"] }
+  ],
+  "relationships": [
+    { "from": "Employee", "to": "LeaveRequest", "label": "1:N" }
+  ]
+}
+```
+
+### Schema Script
+
+```sql
+CREATE TABLE Employee (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR NOT NULL,
+    email VARCHAR NOT NULL UNIQUE
+);
+
+CREATE TABLE LeaveRequest (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    employee_id UUID NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    status VARCHAR NOT NULL CHECK (status IN ('Pending', 'Approved', 'Rejected')),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (employee_id) REFERENCES Employee(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_leaverequest_employee_id ON LeaveRequest(employee_id);
+CREATE INDEX idx_leaverequest_status ON LeaveRequest(status);
+```
+
+### Constraints and Indexes
+
+- **Primary Keys**: `id` in `Employee` and `LeaveRequest`.
+- **Foreign Keys**: `employee_id` in `LeaveRequest` referencing `id` in `Employee`.
+- **Unique Constraints**: `email` in `Employee`.
+- **Check Constraints**: `status` in `LeaveRequest` to ensure it is one of 'Pending', 'Approved', or 'Rejected'.
+- **Indexes**:
+  - `idx_leaverequest_employee_id`: To speed up queries that filter or join on `employee_id`.
+  - `idx_leaverequest_status`: To speed up queries that filter on the `status` of leave requests.
+
+DOCUMENTATION WITH REMAINING PLACEHOLDERS
+==========================================
 # User Guide
 
 ## Overview
-This application is designed for employees within our organization to manage their leave requests. It allows employees to submit leave requests, view their leave history, and track their leave balances. Managers can approve or reject leave requests, ensuring that leave management is efficient and transparent.
+The Employee Leave Application is designed for employees within our organization to submit leave requests and view their leave status. This application streamlines the leave management process, ensuring that employees can easily request time off and managers can efficiently approve or reject these requests. It also helps in tracking leave balances and maintaining accurate records of leave activities.
 
 ## Getting Started
-1. **Login**: Employees and managers should log in using their credentials.
-2. **Navigate to Leave Requests**: After logging in, navigate to the "Leave Requests" section.
-3. **Verify Success**: You should see a list of available actions such as "Submit Leave Request" and "View Leave History".
+To start using the Employee Leave Application, follow these steps:
+
+1. **Login**: Access the application via the web interface and log in using your employee credentials.
+2. **Submit a Leave Request**: Navigate to the 'Leave Requests' section and click on 'Submit Leave Request'. Fill in the required details such as leave type, start date, and end date.
+3. **Verify Submission**: After submitting the request, you should see a confirmation message with the leave request ID and status as 'PENDING'.
 
 ## User Roles and Permissions
 
 ### Employee
-- **Capabilities**: Submit leave requests, view leave history, and check leave balance.
-- **Typical workflows**: Submit a new leave request, view pending leave requests, check leave balance.
-- **Restrictions**: Cannot approve or reject leave requests.
+- **Capabilities**: Submit leave requests, view their own leave status, and check their leave balance.
+- **Typical workflows**: Submit a leave request, check the status of a leave request, view leave balance.
+- **Restrictions**: Cannot approve or reject leave requests, cannot view other employees' leave status.
 
 ### Manager
-- **Capabilities**: Approve or reject leave requests, view all leave requests within their team.
-- **Typical workflows**: Review pending leave requests, approve or reject leave requests, view team leave history.
-- **Restrictions**: Cannot modify leave balance or employee information.
+- **Capabilities**: Approve or reject leave requests submitted by employees under their supervision.
+- **Typical workflows**: Review a leave request, approve or reject the request, view the leave balance of employees.
+- **Restrictions**: Cannot modify leave policies, cannot view leave requests outside their team.
+
+### Admin
+- **Capabilities**: Manage user roles, view all leave requests, and generate leave reports.
+- **Typical workflows**: Assign roles to users, approve or reject leave requests, generate leave reports.
+- **Restrictions**: Cannot modify the core application settings, cannot delete user accounts.
 
 ## Core Workflows
 
 ### Submit a Leave Request
-This workflow allows employees to submit a new leave request.
+This workflow allows employees to request time off.
 
 **Steps:**
-1. Navigate to the "Leave Requests" section by clicking on the menu item.
-2. Click the "Submit Leave Request" button to open the form.
-3. Enter the following fields with values like:
-   - `employeeId`: `1`
-   - `leaveType`: `SICK`
-   - `startDate`: `2023-10-01`
-   - `endDate`: `2023-10-05`
-4. Click the "Submit" button to submit the request.
-5. **Expected outcome**: A success message indicating that the leave request has been submitted.
+1. Navigate to the 'Leave Requests' section by clicking on the 'Leave' tab in the main menu.
+2. Click on 'Submit Leave Request' to open the request form.
+3. Enter the required fields with values like:
+   - `employeeId`: 12345
+   - `leaveType`: SICK
+   - `startDate`: 2023-10-01
+   - `endDate`: 2023-10-05
+4. Click 'Submit' to send the request.
+5. **Expected outcome**: A confirmation message with the leave request ID and status as 'PENDING'.
 
 **Common mistakes:**
-- **Invalid employee ID**: Ensure the employee ID is valid and exists in the system.
-- **Invalid leave type**: Ensure the leave type is one of "SICK", "VACATION", "PERSONAL".
+- **Invalid employee ID**: Ensure the employee ID is correct and exists in the system.
+- **Incorrect date format**: Use the format YYYY-MM-DD for dates.
 
-### Approve a Leave Request
-This workflow allows managers to approve a leave request.
-
-**Steps:**
-1. Navigate to the "Leave Requests" section by clicking on the menu item.
-2. Click on the leave request you want to approve.
-3. Click the "Approve" button to change the status of the leave request.
-4. **Expected outcome**: The leave request status should change to "APPROVED".
-
-**Tips:**
-- Ensure you have the necessary permissions to approve leave requests.
-- Double-check the leave dates to ensure they are valid.
-
-### Reject a Leave Request
-This workflow allows managers to reject a leave request.
+### Approve or Reject a Leave Request
+This workflow allows managers to review and act on leave requests.
 
 **Steps:**
-1. Navigate to the "Leave Requests" section by clicking on the menu item.
-2. Click on the leave request you want to reject.
-3. Click the "Reject" button to change the status of the leave request.
-4. **Expected outcome**: The leave request status should change to "REJECTED".
+1. Navigate to the 'Leave Requests' section by clicking on the 'Leave' tab in the main menu.
+2. Click on the leave request ID to open the details.
+3. Click 'Approve' or 'Reject' to change the status.
+4. **Expected outcome**: The leave request status should update to 'APPROVED' or 'REJECTED'.
 
 **Tips:**
-- Ensure you have the necessary permissions to reject leave requests.
-- Provide a reason for rejection if required.
+- **Check leave balance**: Ensure the employee has sufficient leave balance before approving.
+- **Provide feedback**: Use the comment section to provide feedback on the leave request.
+
+### View Leave Balance
+This workflow allows employees to check their remaining leave balance.
+
+**Steps:**
+1. Navigate to the 'Leave Balance' section by clicking on the 'Leave' tab in the main menu.
+2. Click on 'View Balance' to see the leave balance for different leave types.
+3. **Expected outcome**: A list of leave types and their respective balances.
 
 ## Data Management
 
 ### Creating Records
-To create a new leave request, navigate to the "Leave Requests" section and click the "Submit Leave Request" button. Fill in the required fields: `employeeId`, `leaveType`, `startDate`, and `endDate`. Click "Submit" to create the record.
+To create a new leave request, navigate to the 'Leave Requests' section, click on 'Submit Leave Request', and fill in the required fields. Ensure all fields are correctly filled and validated before submission.
 
 ### Editing Records
-Editing records is not supported in this application. Once a leave request is submitted, it cannot be modified. However, managers can approve or reject the request, effectively changing its status.
+Existing leave requests can be modified by the employee who submitted the request. Navigate to the 'Leave Requests' section, click on the request ID, and then click 'Edit' to make changes. Managers can only change the status of a leave request.
 
 ### Deleting Records
-Deleting records is not supported in this application. Leave requests are tracked for historical purposes and cannot be deleted.
+Leave requests cannot be deleted once submitted. However, they can be marked as 'CANCELLED' if necessary. This action is irreversible and should be used with caution.
 
 ### Filtering and Search
-Use the search bar at the top of the "Leave Requests" section to find specific leave requests by employee ID, leave type, or status.
-
-## Reports and Exports
-Currently, the application does not support generating reports or exporting data. However, managers can view detailed leave history and pending requests within the application.
-
-## Frequently Asked Questions
-
-**Q: Can I submit a leave request for a future date?**
-A: Yes, you can submit a leave request for a future date. Ensure the start date is after the current date.
-
-**Q: What happens if my leave request is rejected?**
-A: If your leave request is rejected, you will receive a notification with the reason for rejection. You can resubmit the request with the necessary changes.
-
-**Q: Can I view my leave balance?**
-A: Yes, you can view your leave balance in the "Leave Requests" section. Your current leave balance is displayed at the top of the page.
-
-## Troubleshooting
-
-### Common Issues
-- **Leave request not submitted**: Ensure all required fields are filled in correctly. Check for any validation errors.
-- **Unable to approve/reject leave request**: Ensure you have the necessary permissions and the leave request is in a pending state.
-- **Error in leave dates**: Ensure the start date is before the end date and both dates are valid.
-
-### Performance Tips
-- Refresh the page if you experience slow loading times.
-- Clear your browser cache if the application is not responding.
-
-## Best Practices
-- Submit leave requests well in advance to allow time for approval.
-- Check your leave balance regularly to plan future leave.
-- Communicate with your manager if you need to make changes to a submitted leave request.
-
-## Getting Help
-- **In-app help**: Click the? icon for contextual help.
-- **Documentation**: See the API Documentation and README for technical details.
-- **Contact support**: Email support@example.com with:
-  - What you were trying to do
-  - Error message (if any)
-  - Screenshots or logs
-  - Your role and username
+Use the search bar and filters in the 'Leave Requests' section to find specific leave requests. Filters can be applied based on employee ID

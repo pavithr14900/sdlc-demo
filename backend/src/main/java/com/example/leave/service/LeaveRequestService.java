@@ -15,10 +15,6 @@ public class LeaveRequestService {
     @Autowired
     private LeaveRequestRepository leaveRequestRepository;
 
-    public LeaveRequest save(LeaveRequest leaveRequest) {
-        return leaveRequestRepository.save(leaveRequest);
-    }
-
     public List<LeaveRequest> findAll() {
         return leaveRequestRepository.findAll();
     }
@@ -27,19 +23,13 @@ public class LeaveRequestService {
         return leaveRequestRepository.findById(id);
     }
 
-    public void approve(UUID id) {
-        leaveRequestRepository.findById(id)
-               .ifPresent(leaveRequest -> {
-                    leaveRequest.setStatus("APPROVED");
-                    leaveRequestRepository.save(leaveRequest);
-                });
+    public LeaveRequest save(LeaveRequest leaveRequest) {
+        return leaveRequestRepository.save(leaveRequest);
     }
 
-    public void reject(UUID id) {
-        leaveRequestRepository.findById(id)
-               .ifPresent(leaveRequest -> {
-                    leaveRequest.setStatus("REJECTED");
-                    leaveRequestRepository.save(leaveRequest);
-                });
+    public void deleteById(UUID id) {
+        leaveRequestRepository.deleteById(id);
     }
+
+    // Additional business methods can be added here
 }
