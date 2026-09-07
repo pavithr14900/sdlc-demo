@@ -9,11 +9,11 @@ CREATE TABLE LeaveRequest (
     employee_id UUID NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
-    status VARCHAR NOT NULL CHECK (status IN ('Pending', 'Approved', 'Rejected')),
+    status VARCHAR NOT NULL DEFAULT 'Pending',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (employee_id) REFERENCES Employee(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_leaverequest_employee_id ON LeaveRequest(employee_id);
-CREATE INDEX idx_leaverequest_status ON LeaveRequest(status);
+CREATE INDEX idx_leave_request_employee_id ON LeaveRequest(employee_id);
+CREATE INDEX idx_leave_request_status ON LeaveRequest(status);

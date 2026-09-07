@@ -5,25 +5,37 @@ provider "aws" {
 
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
+
+  tags = {
+    Name = "leave-app-vpc-${var.environment}"
+  }
 }
 
 resource "aws_subnet" "public" {
+  count             = 2
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-west-2a"
+  cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index)
   map_public_ip_on_launch = true
+
+  tags = {
+    Name = "leave-app-public-subnet-${var.environment}-${count.index}"
+  }
 }
 
 resource "aws_ecs_cluster" "main" {
-  name = "${var.environment}-leave-app-cluster"
+  name = "leave-app-ecs-cluster-${var.environment}"
+
+  tags = {
+    Name = "leave-app-ecs-cluster-${var.environment}"
+  }
 }
 
 resource "aws_ecs_task_definition" "backend" {
-  family                   = "${var.environment}-leave-app-backend"
+  family                   = "leave-app-backend"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "512"
-  memory                   = "1024"
+  cpu                      = "256"
+  memory                   = "512"
 
   container_definitions = jsonencode([{
     name      = "leave-app-backend"
@@ -33,29 +45,67 @@ resource "aws_ecs_task_definition" "backend" {
       containerPort = 8080
       hostPort      = 8080
     }]
-    environment = [
-      { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${aws_db_instance.leave_app_db.address}/${var.database_credentials.db_name}" },
-      { name = "SPRING_DATASOURCE_USERNAME", value = var.database_credentials.db_username },
-      { name = "SPRING_DATASOURCE_PASSWORD", value = var.database_credentials.db_password }
-    ]
   }])
+
+  tags = {
+    Name = "leave-app-task-def-${var.environment}"
+  }
 }
 
 resource "aws_ecs_service" "backend" {
-  name            = "${var.environment}-leave-app-backend-service"
+  name            = "leave-app-backend-service-${var.environment}"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.backend.arn
   desired_count   = 1
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = [aws_subnet.public.id]
+    subnets         = aws_subnet.public.*.id
     security_groups = [aws_security_group.backend_sg.id]
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.backend.arn
+    container_name   = "leave-app-backend"
+    container_port   = 8080
+  }
+
+  tags = {
+    Name = "leave-app-backend-service-${var.environment}"
+  }
+}
+
+resource "aws_lb" "backend" {
+  name               = "leave-app-backend-alb-${var.environment}"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.backend_sg.id]
+  subnets            = aws_subnet.public.*.id
+
+  tags = {
+    Name = "leave-app-backend-alb-${var.environment}"
+  }
+}
+
+resource "aws_lb_target_group" "backend" {
+  name     = "leave-app-backend-tg-${var.environment}"
+  port     = 8080
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.main.id
+
+  health_check {
+    path = "/"
+  }
+
+  tags = {
+    Name = "leave-app-backend-tg-${var.environment}"
   }
 }
 
 resource "aws_security_group" "backend_sg" {
-  vpc_id = aws_vpc.main.id
+  name        = "leave-app-backend-sg-${var.environment}"
+  description = "Security group for backend service"
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port   = 8080
@@ -70,73 +120,32 @@ resource "aws_security_group" "backend_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
 
-resource "aws_lb" "main" {
-  name               = "${var.environment}-leave-app-lb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.backend_sg.id]
-  subnets            = [aws_subnet.public.id]
-}
-
-resource "aws_lb_listener" "main" {
-  load_balancer_arn = aws_lb.main.arn
-  port              = "80"
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.main.arn
+  tags = {
+    Name = "leave-app-backend-sg-${var.environment}"
   }
-}
-
-resource "aws_lb_target_group" "main" {
-  name_prefix      = "${var.environment}-leave-app-tg"
-  port             = 8080
-  protocol         = "HTTP"
-  vpc_id           = aws_vpc.main.id
-  target_type      = "ip"
-  health_check {
-    path            = "/"
-    port            = "traffic-port"
-    protocol        = "HTTP"
-    matcher         = "200"
-    interval        = 30
-    timeout         = 5
-    healthy_threshold = 2
-    unhealthy_threshold = 2
-  }
-}
-
-resource "aws_db_instance" "leave_app_db" {
-  allocated_storage    = 20
-  engine               = "postgres"
-  instance_class       = "db.t3.medium"
-  name                 = "leave_app_db"
-  username             = var.database_credentials.db_username
-  password             = var.database_credentials.db_password
-  parameter_group_name = "default.postgres12"
-  db_subnet_group_name = aws_db_subnet_group.main.name
-  db_name              = var.database_credentials.db_name
-  publicly_accessible  = false
-  skip_final_snapshot = true
-}
-
-resource "aws_db_subnet_group" "main" {
-  name       = "${var.environment}-leave-app-db-subnet-group"
-  subnet_ids = [aws_subnet.public.id]
 }
 
 resource "aws_s3_bucket" "frontend" {
-  bucket = "${var.environment}-leave-app-frontend"
-  acl    = "private"
+  bucket = "leave-app-frontend-bucket-${var.environment}"
+
+  versioning {
+    enabled = true
+  }
+
+  tags = {
+    Name = "leave-app-frontend-bucket-${var.environment}"
+  }
 }
 
-resource "aws_cloudfront_distribution" "main" {
+resource "aws_cloudfront_distribution" "frontend" {
   origin {
     domain_name = aws_s3_bucket.frontend.bucket_regional_domain_name
-    origin_id   = "s3-origin"
+    origin_id   = aws_s3_bucket.frontend.arn
+
+    custom_origin_config {
+      origin_protocol_policy = "http-only"
+    }
   }
 
   enabled             = true
@@ -144,32 +153,75 @@ resource "aws_cloudfront_distribution" "main" {
   default_root_object = "index.html"
 
   default_cache_behavior {
-    target_origin_id = "s3-origin"
+    target_origin_id = aws_s3_bucket.frontend.arn
     viewer_protocol_policy = "redirect-to-https"
+
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
+
     forwarded_values {
       query_string = false
       cookies {
         forward = "none"
       }
     }
-    min_ttl         = 3600
-    default_ttl     = 86400
-    max_ttl         = 31536000
+
+    min_ttl = 3600
   }
 
   price_class = "PriceClass_100"
+
+  tags = {
+    Name = "leave-app-cloudfront-distribution-${var.environment}"
+  }
 }
 
-output "load_balancer_dns_name" {
-  value = aws_lb.main.dns_name
+resource "aws_db_instance" "postgresql" {
+  allocated_storage    = 20
+  engine               = "postgres"
+  engine_version       = "13.3"
+  instance_class       = "db.t3.micro"
+  name                 = "leave-app-db-${var.environment}"
+  username             = var.db_username
+  password             = var.db_password
+  parameter_group_name = "default.postgres13"
+  db_subnet_group_name = aws_db_subnet_group.main.name
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
+
+  tags = {
+    Name = "leave-app-db-${var.environment}"
+  }
 }
 
-output "cloudfront_domain_name" {
-  value = aws_cloudfront_distribution.main.domain_name
+resource "aws_db_subnet_group" "main" {
+  name       = "leave-app-db-subnet-group-${var.environment}"
+  subnet_ids = aws_subnet.public.*.id
+
+  tags = {
+    Name = "leave-app-db-subnet-group-${var.environment}"
+  }
 }
 
-output "rds_endpoint" {
-  value = aws_db_instance.leave_app_db.endpoint
+resource "aws_security_group" "db_sg" {
+  name        = "leave-app-db-sg-${var.environment}"
+  description = "Security group for database"
+  vpc_id       = aws_vpc.main.id
+
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "leave-app-db-sg-${var.environment}"
+  }
 }

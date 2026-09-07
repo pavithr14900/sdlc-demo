@@ -1,38 +1,37 @@
 # Release Notes
 
 ## Version 1.0.0 - Initial Release
-**Release Date**: 2023-10-01  
+**Release Date**: 2023-10-01
 **Status**: Stable
 
 ### Summary
-This release introduces the Employee Leave Application for our organization. The application allows employees to submit leave requests, view their leave status, and managers to approve or reject leave requests. It also provides a feature to check the leave balance of employees.
+This release introduces the Employee Leave Application for our organization. It allows employees to submit leave requests and HR personnel to approve them. The application includes a user-friendly interface, robust backend services, and secure data handling.
 
 ### New Features
-- **Leave Request Submission**: Employees can submit leave requests through the web interface, specifying the leave type, start date, and end date. This feature enables employees to formally request time off.
-- **Leave Request Approval/Rejection**: Managers can approve or reject leave requests, updating the status accordingly. This feature streamlines the leave approval process.
-- **Leave Balance Retrieval**: Employees can view their leave balance for different leave types. This feature helps employees keep track of their available leave.
+- **Employee Leave Request Submission**: Employees can submit leave requests through a web interface, specifying the leave type, start date, and end date. This feature enables employees to request time off efficiently.
+- **Leave Request Approval Workflow**: HR personnel can approve or reject leave requests, updating the status accordingly. This feature streamlines the leave approval process.
+- **Leave Balance Tracking**: The application tracks and displays the leave balance for each employee, ensuring transparency and compliance with leave policies.
 
 ### Core Capabilities Delivered
-- **Web-based Interface**: A user-friendly web interface for employees to interact with the leave application.
-- **RESTful APIs**: Comprehensive APIs for leave request submission, retrieval, approval, rejection, and leave balance checking.
-- **Database Integration**: A PostgreSQL database to store and retrieve leave data securely.
+- **User Authentication and Authorization**: Secure login and role-based access control using Spring Security.
+- **Data Persistence**: Data storage and retrieval using Spring Data JPA and PostgreSQL.
+- **RESTful API Endpoints**: Functional endpoints for leave request operations, including submission, retrieval, approval, and rejection.
 
 ### Improvements & Polish
-- **Role-based Access Control**: Implemented to ensure only authorized users can access specific endpoints.
-- **Input Validation**: Used Spring's built-in validation annotations and custom validators to ensure data integrity.
-- **UI Refinement**: Improved the user interface for better usability and accessibility.
+- **Input Validation**: Field-level validation ensures data integrity and prevents invalid requests.
+- **Error Handling**: Standardized error responses provide clear feedback to users.
+- **UI Refinement**: Improved user interface for better usability and accessibility.
 
 ### Known Issues & Limitations
-- **Limited Leave Types**: Currently supports only three leave types (SICK, VACATION, PERSONAL). Will be expanded in future releases.
-- **Performance**: Handles up to 1000 records efficiently. Performance may degrade with higher volumes.
-- **No Leave Carry Forward**: Leave balance does not carry forward to the next year. This feature will be added in future releases.
+- **Third-Party Integrations**: Not implemented in this version. Will be addressed in version 1.1.
+- **Performance**: The application handles up to 1000 records efficiently.
 
 ### Breaking Changes
-- **None**: This is the initial release with no breaking changes.
+- **None**
 
 ### Compatibility
-- **Requires**: Java 11, PostgreSQL 13, Spring Boot 2.5.x
-- **Tested on**: Windows 10, macOS 11, Ubuntu 20.04, Chrome 94, Firefox 92, Edge 94
+- Requires: Java 11, PostgreSQL 13
+- Tested on: Windows 10, macOS 11, Ubuntu 20.04
 
 ### Upgrade Notes
 To deploy this release:
@@ -44,22 +43,22 @@ To deploy this release:
 6. Verify health: `curl http://localhost:8080/actuator/health`
 
 ### Contributors
-- **John Doe**: Lead Developer, implemented core business logic and APIs.
-- **Jane Smith**: UI/UX Designer, designed the web interface and improved user experience.
-- **Alex Johnson**: Security Expert, implemented authentication and authorization mechanisms.
+- **John Doe**: Lead Developer
+- **Jane Smith**: UI/UX Designer
+- **Alex Brown**: Security Expert
 
 ### What's Next
 
 #### Planned for Version 1.1
-- **Leave Carry Forward**: Implement leave balance carry forward to the next year.
-- **Additional Leave Types**: Add support for more leave types.
-- **Performance Improvement**: Optimize database queries for better performance.
+- **Third-Party Integrations**: Integration with third-party services for additional functionality.
+- **Performance Enhancements**: Optimizations for handling larger datasets.
+- **Additional Leave Types**: Support for more leave types like "Bereavement" and "Maternity".
 
 #### Future Roadmap
-- **Mobile App**: Develop a mobile application for leave request submission and status checking.
-- **Integration with Payroll System**: Automate leave deductions from employee salaries.
+- **Mobile Application**: Development of a mobile app for leave request submission and approval.
+- **Advanced Analytics**: Implementation of analytics for leave usage and trends.
 
 ### Feedback & Support
-- Report issues: [GitHub Issues](https://github.com/example/leave-management/issues)
-- Request features: [GitHub Issues](https://github.com/example/leave-management/issues)
-- Documentation: See README.md, User Guide, and API Documentation
+- Report issues: [GitHub Issues](https://github.com/example/leave-app/issues)
+- Request features: [GitHub Issues](https://github.com/example/leave-app/issues)
+- Documentation: See [README.md](https://github.com/example/leave-app/blob/main/README.md), [User Guide](https://github.com/example/leave-app/blob/main/docs/user-guide.md), and [API Documentation](https://github.com/example/leave-app/blob/main/docs/api-docs.md)

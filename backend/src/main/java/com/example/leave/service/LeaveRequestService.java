@@ -1,9 +1,12 @@
 package com.example.leave.service;
 
+import com.example.leave.model.Employee;
 import com.example.leave.model.LeaveRequest;
 import com.example.leave.repository.LeaveRequestRepository;
+import com.example.leave.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,21 +18,38 @@ public class LeaveRequestService {
     @Autowired
     private LeaveRequestRepository leaveRequestRepository;
 
-    public List<LeaveRequest> findAll() {
-        return leaveRequestRepository.findAll();
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @Transactional
+    public LeaveRequest createLeaveRequest(UUID employeeId, LeaveRequest leaveRequest) {
+        Optional<Employee> employee = employeeRepository.findById(employeeId);
+        if (employee.isPresent()) {
+            leaveRequest.setEmployee(employee.get());
+            return leaveRequestRepository.save(leaveRequest);
+        } else {
+            throw new RuntimeException("Employee not found");
+        }
     }
 
-    public Optional<LeaveRequest> findById(UUID id) {
-        return leaveRequestRepository.findById(id);
+    @Transactional(readOnly = true)
+    public List<LeaveRequest> getLeaveRequestsByEmployeeId(UUID employeeId) {
+        return leaveRequestRepository.findByEmployeeId(employeeId);
     }
 
-    public LeaveRequest save(LeaveRequest leaveRequest) {
+    @Transactional
+    public LeaveRequest approveLeaveRequest(UUID id) {
+        LeaveRequest leaveRequest = leaveRequestRepository.findById(id)
+               .orElseThrow(() -> new RuntimeException("Leave request not found"));
+        leaveRequest.setStatus("Approved");
         return leaveRequestRepository.save(leaveRequest);
     }
 
-    public void deleteById(UUID id) {
-        leaveRequestRepository.deleteById(id);
+    @Transactional
+    public LeaveRequest rejectLeaveRequest(UUID id) {
+        LeaveRequest leaveRequest = leaveRequestRepository.findById(id)
+               .orElseThrow(() -> new RuntimeException("Leave request not found"));
+        leaveRequest.setStatus("Rejected");
+        return leaveRequestRepository.save(leaveRequest);
     }
-
-    // Additional business methods can be added here
 }

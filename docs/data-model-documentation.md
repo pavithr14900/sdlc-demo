@@ -2,10 +2,10 @@
 
 ## Overview
 
-The application manages the following core domains to facilitate the submission, approval, and tracking of employee leave requests within our organization.
+The employee leave application manages data related to employees and their leave requests. It ensures that leave requests are submitted, processed, and approved in an organized manner. The system manages the following core domains:
 
-- **Employee**: Responsible for managing employee data, including leave balances and requests. Cardinality: 1:N with LeaveRequest.
-- **LeaveRequest**: Responsible for managing leave requests, including their status and associated dates. Cardinality: N:1 with Employee.
+- **Employee**: Responsible for storing employee details and their leave requests. The cardinality is 1:N, meaning one employee can have multiple leave requests.
+- **LeaveRequest**: Responsible for storing details of each leave request, including the employee who requested it, the dates, and the status. The cardinality is 1:N, meaning one leave request is associated with one employee.
 
 ## Entity Relationship Diagram
 
@@ -20,8 +20,7 @@ The application manages the following core domains to facilitate the submission,
 ## Entities
 
 ### Employee
-
-**Purpose**: Represents an employee within the organization, including their leave balance and requests.
+**Purpose**: Represents an employee in the organization.
 
 **Table/Collection Name**: `Employee`
 
@@ -41,12 +40,11 @@ The application manages the following core domains to facilitate the submission,
 
 **Validation Rules:**
 
-- `email` must be non-empty and unique across all records
 - `name` must be non-empty
+- `email` must be non-empty and unique across all records
 
 ### LeaveRequest
-
-**Purpose**: Represents a leave request submitted by an employee, including its status and associated dates.
+**Purpose**: Represents a leave request made by an employee.
 
 **Table/Collection Name**: `LeaveRequest`
 
@@ -55,10 +53,10 @@ The application manages the following core domains to facilitate the submission,
 | Field Name | Type | Required | Constraints | Description |
 |------------|------|----------|-------------|-------------|
 | `id` | UUID | Yes | Primary key, auto-generated | Unique identifier for the leave request |
-| `employee_id` | UUID | Yes | Foreign key to Employee.id | Employee who requested the leave |
-| `start_date` | DATE | Yes | Must not be in the past | Start date of the leave |
-| `end_date` | DATE | Yes | Must be after start_date | End date of the leave |
-| `status` | VARCHAR | Yes | Must be one of 'Pending', 'Approved', 'Rejected' | Status of the leave request |
+| `employee_id` | UUID | Yes | Foreign key referencing `Employee.id` | Employee who requested the leave |
+| `start_date` | DATE | Yes | | Start date of the leave |
+| `end_date` | DATE | Yes | | End date of the leave |
+| `status` | VARCHAR | Yes | Default 'Pending' | Status of the leave request |
 | `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
 | `updated_at` | TIMESTAMP | Yes | Auto-set on create/update | Last modification time |
 
@@ -68,8 +66,8 @@ The application manages the following core domains to facilitate the submission,
 
 **Validation Rules:**
 
-- `start_date` must be a valid date and not in the past
-- `end_date` must be a valid date and after `start_date`
+- `start_date` must be a valid date
+- `end_date` must be a valid date and must be after `start_date`
 - `status` must be one of 'Pending', 'Approved', 'Rejected'
 
 ## Relationships and Constraints
@@ -88,13 +86,12 @@ The application manages the following core domains to facilitate the submission,
 
 **Business Rules:**
 
-- `LeaveRequest.start_date` must be a valid date and not in the past: If violated, return error "Start date must not be in the past."
-- `LeaveRequest.end_date` must be a valid date and after `start_date`: If violated, return error "End date must be after start date."
-- `LeaveRequest.status` must be one of 'Pending', 'Approved', 'Rejected': If violated, return error "Invalid leave status."
+- `start_date` must be before `end_date`: If `start_date` is after `end_date`, return validation error.
+- `status` must be one of 'Pending', 'Approved', 'Rejected': If `status` is not one of these values, return validation error.
 
 **Format Rules:**
 
-- `Employee.email`: Must match regex `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+- `email`: Must match the regex `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 
 ## Data Lifecycle
 
@@ -106,12 +103,12 @@ The application manages the following core domains to facilitate the submission,
 
 ### Updates
 
-- `LeaveRequest.status` can only be updated by an authorized user (e.g., manager)
+- `LeaveRequest.status` can only be updated by HR personnel
 - `updated_at` is automatically updated on any modification
 
 ### Archival / Soft Delete
 
-- Records are not archived but can be marked as deleted by setting the `status` to 'Rejected'
+- Records are not archived but can be marked as 'Rejected' or 'Approved' to indicate their status
 
 ## Indexes
 

@@ -1,13 +1,15 @@
 package com.example.leave.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
+import lombok.Data;
+
 import java.time.LocalDate;
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "LeaveRequest")
+@Data
 public class LeaveRequest {
 
     @Id
@@ -27,13 +29,11 @@ public class LeaveRequest {
     private LocalDate endDate;
 
     @NotNull
-    @Size(min = 1, max = 20)
-    private String status;
+    @Pattern(regexp = "^(Pending|Approved|Rejected)$")
+    private String status = "Pending";
 
     @Column(updatable = false)
-    private LocalDate createdAt = LocalDate.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    private LocalDate updatedAt = LocalDate.now();
-
-    // Getters and setters omitted for brevity
+    private LocalDateTime updatedAt = LocalDateTime.now();
 }

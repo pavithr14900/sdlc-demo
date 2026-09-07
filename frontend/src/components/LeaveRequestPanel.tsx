@@ -1,58 +1,63 @@
-import React, { useState } from'react';
+import React, { useState } from 'react';
+
+interface LeaveRequestFormProps {
+  onSubmit: (leaveRequest: LeaveRequest) => void;
+}
 
 interface LeaveRequest {
-  id: string;
   employeeId: string;
   leaveType: string;
   startDate: string;
   endDate: string;
-  status: string;
+  reason: string;
 }
 
-const LeaveRequestPanel: React.FC = () => {
-  const [leaveRequest, setLeaveRequest] = useState<LeaveRequest>({
-    id: '',
+const LeaveRequestPanel: React.FC<LeaveRequestFormProps> = ({ onSubmit }) => {
+  const [form, setForm] = useState<LeaveRequest>({
     employeeId: '',
     leaveType: '',
     startDate: '',
     endDate: '',
-    status: ''
+    reason: ''
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setLeaveRequest({...leaveRequest, [name]: value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setForm({...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
+    onSubmit(form);
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <label>Leave Type</label>
-        <select name="leaveType" value={leaveRequest.leaveType} onChange={handleChange}>
+        <label>Employee ID:</label>
+        <input type="text" name="employeeId" value={form.employeeId} onChange={handleChange} required />
+      </div>
+      <div>
+        <label>Leave Type:</label>
+        <select name="leaveType" value={form.leaveType} onChange={handleChange} required>
           <option value="">Select Leave Type</option>
           <option value="SICK">Sick Leave</option>
-          <option value="VACATION">Vacation Leave</option>
-          <option value="PERSONAL">Personal Leave</option>
+          <option value="VACATION">Vacation</option>
+          <option value="PERSONAL">Personal</option>
         </select>
       </div>
       <div>
-        <label>Start Date</label>
-        <input type="date" name="startDate" value={leaveRequest.startDate} onChange={handleChange} />
+        <label>Start Date:</label>
+        <input type="date" name="startDate" value={form.startDate} onChange={handleChange} required />
       </div>
       <div>
-        <label>End Date</label>
-        <input type="date" name="endDate" value={leaveRequest.endDate} onChange={handleChange} />
+        <label>End Date:</label>
+        <input type="date" name="endDate" value={form.endDate} onChange={handleChange} required />
       </div>
       <div>
-        <label>Reason</label>
-        <textarea name="reason" />
+        <label>Reason:</label>
+        <textarea name="reason" value={form.reason} onChange={handleChange} required />
       </div>
-      <button type="submit">Submit Leave Request</button>
+      <button type="submit">Submit</button>
     </form>
   );
 };

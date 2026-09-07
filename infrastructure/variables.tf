@@ -1,28 +1,26 @@
 variable "region" {
-  description = "The AWS region to deploy the infrastructure"
+  description = "The AWS region to deploy to"
   type        = string
-  default     = "us-west-2"
 }
 
 variable "environment" {
-  description = "The environment name for the infrastructure"
+  description = "The environment name"
   type        = string
-  default     = "dev"
-}
-
-variable "instance_size" {
-  description = "The instance size for the ECS Fargate tasks"
-  type        = string
-  default     = "large"
-}
-
-variable "database_credentials" {
-  description = "Database credentials for the RDS PostgreSQL instance"
-  type        = map(string)
-  sensitive   = true
 }
 
 variable "container_image" {
-  description = "The container image for the ECS Fargate service"
+  description = "The Docker image for the backend service"
   type        = string
+}
+
+variable "db_username" {
+  description = "The username for the PostgreSQL database"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_password" {
+  description = "The password for the PostgreSQL database"
+  type        = string
+  sensitive   = true
 }
