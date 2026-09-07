@@ -1,39 +1,59 @@
 import React, { useState } from 'react';
 
+interface LeaveRequestFormProps {
+  onSubmit: (leaveRequest: LeaveRequest) => void;
+}
+
 interface LeaveRequest {
-    id: string;
-    employeeId: string;
-    leaveType: string;
-    startDate: string;
-    endDate: string;
-    status: string;
+  leaveType: string;
+  startDate: string;
+  endDate: string;
+  reason: string;
 }
 
-interface LeaveRequestPanelProps {
-    leaveRequests: LeaveRequest[];
-    onApprove: (id: string) => void;
-    onReject: (id: string) => void;
-}
+const LeaveRequestPanel: React.FC<LeaveRequestFormProps> = ({ onSubmit }) => {
+  const [leaveType, setLeaveType] = useState<string>('');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [reason, setReason] = useState<string>('');
 
-const LeaveRequestPanel: React.FC<LeaveRequestPanelProps> = ({ leaveRequests, onApprove, onReject }) => {
-    return (
-        <div>
-            <h2>Leave Requests</h2>
-            <ul>
-                {leaveRequests.map(request => (
-                    <li key={request.id}>
-                        <p>Employee ID: {request.employeeId}</p>
-                        <p>Leave Type: {request.leaveType}</p>
-                        <p>Start Date: {request.startDate}</p>
-                        <p>End Date: {request.endDate}</p>
-                        <p>Status: {request.status}</p>
-                        <button onClick={() => onApprove(request.id)}>Approve</button>
-                        <button onClick={() => onReject(request.id)}>Reject</button>
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const leaveRequest: LeaveRequest = {
+      leaveType,
+      startDate,
+      endDate,
+      reason,
+    };
+    onSubmit(leaveRequest);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label>Leave Type:</label>
+        <select value={leaveType} onChange={(e) => setLeaveType(e.target.value)}>
+          <option value="">Select Leave Type</option>
+          <option value="SICK">Sick Leave</option>
+          <option value="VACATION">Vacation Leave</option>
+          <option value="PERSONAL">Personal Leave</option>
+        </select>
+      </div>
+      <div>
+        <label>Start Date:</label>
+        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+      </div>
+      <div>
+        <label>End Date:</label>
+        <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+      </div>
+      <div>
+        <label>Reason:</label>
+        <textarea value={reason} onChange={(e) => setReason(e.target.value)}></textarea>
+      </div>
+      <button type="submit">Submit Request</button>
+    </form>
+  );
 };
 
 export default LeaveRequestPanel;

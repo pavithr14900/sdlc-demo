@@ -1,14 +1,14 @@
-output "load_balancer_dns_name" {
-  description = "The DNS name of the load balancer"
+output "alb_dns_name" {
+  description = "The DNS name of the Application Load Balancer"
   value       = aws_lb.main.dns_name
 }
 
 output "cloudfront_domain_name" {
-  description = "The CloudFront domain name"
+  description = "The domain name of the CloudFront distribution"
   value       = aws_cloudfront_distribution.frontend.domain_name
 }
 
 output "rds_endpoint" {
-  description = "The RDS endpoint"
+  description = "The endpoint of the RDS PostgreSQL instance"
   value       = aws_db_instance.main.endpoint
 }

@@ -1,31 +1,33 @@
 variable "region" {
   description = "The AWS region to deploy to"
   type        = string
+  default     = "us-west-2"
 }
 
-variable "environment_name" {
-  description = "The environment name for the deployment"
+variable "environment" {
+  description = "The environment name"
   type        = string
+  default     = "dev"
 }
 
-variable "availability_zone" {
-  description = "The availability zone to deploy to"
+variable "instance_size" {
+  description = "The instance size for the ECS Fargate tasks"
   type        = string
+  default     = "large"
+}
+
+variable "db_credentials" {
+  description = "Database credentials"
+  type        = map(string)
+  sensitive   = true
+  default     = {
+    username = "admin"
+    password = "password"
+  }
 }
 
 variable "container_image" {
-  description = "The container image to deploy"
+  description = "The container image for the backend service"
   type        = string
-}
-
-variable "db_username" {
-  description = "The database username"
-  type        = string
-  sensitive   = true
-}
-
-variable "db_password" {
-  description = "The database password"
-  type        = string
-  sensitive   = true
+  default     = "my-backend-image:latest"
 }

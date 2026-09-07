@@ -19,25 +19,31 @@ public class LeaveRequestController {
 
     @PostMapping
     public ResponseEntity<LeaveRequest> createLeaveRequest(@RequestBody LeaveRequest leaveRequest) {
-        LeaveRequest createdLeaveRequest = leaveRequestService.createLeaveRequest(leaveRequest);
-        return new ResponseEntity<>(createdLeaveRequest, HttpStatus.CREATED);
+        LeaveRequest savedLeaveRequest = leaveRequestService.save(leaveRequest);
+        return new ResponseEntity<>(savedLeaveRequest, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<LeaveRequest> getLeaveRequestById(@PathVariable UUID id) {
-        Optional<LeaveRequest> leaveRequest = leaveRequestService.getLeaveRequestById(id);
+        Optional<LeaveRequest> leaveRequest = leaveRequestService.findById(id);
         return leaveRequest.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PatchMapping("/{id}/approve")
-    public ResponseEntity<LeaveRequest> approveLeaveRequest(@PathVariable UUID id) {
-        LeaveRequest approvedLeaveRequest = leaveRequestService.approveLeaveRequest(id);
-        return new ResponseEntity<>(approvedLeaveRequest, HttpStatus.OK);
+    @GetMapping
+    public ResponseEntity<List<LeaveRequest>> getAllLeaveRequests() {
+        List<LeaveRequest> leaveRequests = leaveRequestService.findAll();
+        return new ResponseEntity<>(leaveRequests, HttpStatus.OK);
     }
 
-    @PatchMapping("/{id}/reject")
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<LeaveRequest> approveLeaveRequest(@PathVariable UUID id) {
+        leaveRequestService.approve(id);
+        return getLeaveRequestById(id);
+    }
+
+    @PutMapping("/{id}/reject")
     public ResponseEntity<LeaveRequest> rejectLeaveRequest(@PathVariable UUID id) {
-        LeaveRequest rejectedLeaveRequest = leaveRequestService.rejectLeaveRequest(id);
-        return new ResponseEntity<>(rejectedLeaveRequest, HttpStatus.OK);
+        leaveRequestService.reject(id);
+        return getLeaveRequestById(id);
     }
 }
