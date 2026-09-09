@@ -1,63 +1,55 @@
 import React, { useState } from 'react';
 
-interface LeaveRequestFormProps {
-  onSubmit: (leaveRequest: LeaveRequest) => void;
-}
-
 interface LeaveRequest {
+  id: string;
   employeeId: string;
-  leaveType: string;
   startDate: string;
   endDate: string;
-  reason: string;
+  status: string;
 }
 
-const LeaveRequestPanel: React.FC<LeaveRequestFormProps> = ({ onSubmit }) => {
-  const [form, setForm] = useState<LeaveRequest>({
+const LeaveRequestPanel: React.FC = () => {
+  const [leaveRequest, setLeaveRequest] = useState<LeaveRequest>({
+    id: '',
     employeeId: '',
-    leaveType: '',
     startDate: '',
     endDate: '',
-    reason: ''
+    status: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setForm({...form, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setLeaveRequest(prevState => ({...prevState, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(form);
+    // Handle form submission logic here
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <div>
-        <label>Employee ID:</label>
-        <input type="text" name="employeeId" value={form.employeeId} onChange={handleChange} required />
-      </div>
-      <div>
-        <label>Leave Type:</label>
-        <select name="leaveType" value={form.leaveType} onChange={handleChange} required>
-          <option value="">Select Leave Type</option>
+      <label>
+        Leave Type:
+        <select name="leaveType" onChange={handleChange}>
           <option value="SICK">Sick Leave</option>
-          <option value="VACATION">Vacation</option>
-          <option value="PERSONAL">Personal</option>
+          <option value="VACATION">Vacation Leave</option>
+          <option value="MATERNITY">Maternity Leave</option>
         </select>
-      </div>
-      <div>
-        <label>Start Date:</label>
-        <input type="date" name="startDate" value={form.startDate} onChange={handleChange} required />
-      </div>
-      <div>
-        <label>End Date:</label>
-        <input type="date" name="endDate" value={form.endDate} onChange={handleChange} required />
-      </div>
-      <div>
-        <label>Reason:</label>
-        <textarea name="reason" value={form.reason} onChange={handleChange} required />
-      </div>
-      <button type="submit">Submit</button>
+      </label>
+      <label>
+        Start Date:
+        <input type="date" name="startDate" onChange={handleChange} />
+      </label>
+      <label>
+        End Date:
+        <input type="date" name="endDate" onChange={handleChange} />
+      </label>
+      <label>
+        Reason:
+        <textarea name="reason" onChange={handleChange}></textarea>
+      </label>
+      <button type="submit">Submit Request</button>
     </form>
   );
 };

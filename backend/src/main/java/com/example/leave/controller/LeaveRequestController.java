@@ -3,13 +3,11 @@ package com.example.leave.controller;
 import com.example.leave.model.LeaveRequest;
 import com.example.leave.service.LeaveRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/leave-requests")
@@ -19,28 +17,31 @@ public class LeaveRequestController {
     private LeaveRequestService leaveRequestService;
 
     @PostMapping
-    public ResponseEntity<LeaveRequest> createLeaveRequest(
-            @RequestParam UUID employeeId,
-            @Valid @RequestBody LeaveRequest leaveRequest) {
-        LeaveRequest createdLeaveRequest = leaveRequestService.createLeaveRequest(employeeId, leaveRequest);
-        return new ResponseEntity<>(createdLeaveRequest, HttpStatus.CREATED);
+    public ResponseEntity<LeaveRequest> createLeaveRequest(@RequestBody LeaveRequest leaveRequest) {
+        LeaveRequest savedLeaveRequest = leaveRequestService.save(leaveRequest);
+        return ResponseEntity.created(null).body(savedLeaveRequest);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<LeaveRequest> getLeaveRequestById(@PathVariable UUID id) {
+        Optional<LeaveRequest> leaveRequest = leaveRequestService.findById(id);
+        return leaveRequest.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    public ResponseEntity<List<LeaveRequest>> getLeaveRequestsByEmployeeId(@RequestParam UUID employeeId) {
-        List<LeaveRequest> leaveRequests = leaveRequestService.getLeaveRequestsByEmployeeId(employeeId);
-        return ResponseEntity.ok(leaveRequests);
+    public ResponseEntity<List<LeaveRequest>> getAllLeaveRequests() {
+        return ResponseEntity.ok(leaveRequestService.findByEmployeeId(null));
     }
 
     @PatchMapping("/{id}/approve")
     public ResponseEntity<LeaveRequest> approveLeaveRequest(@PathVariable UUID id) {
-        LeaveRequest approvedLeaveRequest = leaveRequestService.approveLeaveRequest(id);
-        return ResponseEntity.ok(approvedLeaveRequest);
+        leaveRequestService.approve(id);
+        return getLeaveRequestById(id);
     }
 
     @PatchMapping("/{id}/reject")
     public ResponseEntity<LeaveRequest> rejectLeaveRequest(@PathVariable UUID id) {
-        LeaveRequest rejectedLeaveRequest = leaveRequestService.rejectLeaveRequest(id);
-        return ResponseEntity.ok(rejectedLeaveRequest);
+        leaveRequestService.reject(id);
+        return getLeaveRequestById(id);
     }
 }

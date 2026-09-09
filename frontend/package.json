@@ -1,5 +1,5 @@
 {
-  "name": "leave-management",
+  "name": "leave-management-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,12 +10,12 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "typescript": "^4.9.4"
+    "typescript": "^4.9.3"
   },
   "devDependencies": {
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
-    "typescript": "^4.9.4",
-    "vite": "^4.0.0"
+    "typescript": "^4.9.3",
+    "vite": "^3.0.0"
   }
 }
