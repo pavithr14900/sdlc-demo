@@ -4,16 +4,21 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "Expense")
+@Data
 public class Expense {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
     @ManyToOne
@@ -21,20 +26,24 @@ public class Expense {
     private Employee employee;
 
     @NotNull
-    @DecimalMin("0.0")
+    @DecimalMin("0.01")
     private BigDecimal amount;
 
     @NotBlank
     private String description;
 
-    @Column(nullable = false, columnDefinition = "VARCHAR(20) CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED'))")
-    private String status = "PENDING";
+    @Column(updatable = false)
+    private LocalDateTime submittedAt = LocalDateTime.now();
 
-    @Column(nullable = false, updatable = false)
+    @Enumerated(EnumType.STRING)
+    private ExpenseStatus status = ExpenseStatus.PENDING;
+
+    @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
+}
 
-    // Getters and setters omitted for brevity
+enum ExpenseStatus {
+    PENDING, APPROVED, REJECTED
 }

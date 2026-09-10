@@ -1,37 +1,41 @@
 # README / Setup Guide
 
 ## Overview
-This application is an employee leave management system designed to streamline the process of submitting, approving, and tracking leave requests within an organization. It provides core benefits such as improved efficiency in leave management, better tracking of leave balances, and enhanced communication between employees and managers. The target users are employees who need to request leave and managers who need to approve or reject these requests.
+This document provides a comprehensive guide for setting up and running the employee leave application for our organization. The application allows employees to submit leave requests, managers to approve or reject these requests, and HR to monitor the overall leave status of employees. The core benefits of this application include streamlined leave management, improved transparency, and reduced administrative overhead. The target users are employees, managers, and HR personnel within the organization.
 
 ## Key Features
-- Employees can submit leave requests with details such as leave type, start date, and end date.
-- Managers can approve or reject leave requests with comments.
-- Employees can view their leave balances.
-- The system ensures data integrity and security through validation, authentication, and authorization mechanisms.
+- Employees can submit leave requests with details such as leave type, start date, end date, and reason.
+- Managers can approve or reject leave requests and view the leave status of their team members.
+- HR personnel can monitor the overall leave status of all employees and generate reports.
 
 ## Prerequisites
-- Java 11+
-- PostgreSQL 13+
+- Python 3.9+
 - Node.js 16+
-- npm 8+
-- Hardware/resource requirements: Minimum 2GB RAM, 10GB storage
-- Required system dependencies: Git, Maven
+- PostgreSQL 13+
+- Docker and Docker Compose
+- A Unix-like operating system (Linux or macOS) or Windows Subsystem for Linux (WSL)
 
 ## Project Structure
-The repository layout is as follows, reflecting the architecture design:
+The repository layout is as follows:
 
-- `backend/`: Contains the Spring Boot application with RESTful API endpoints, business logic, and data access layers.
-- `frontend/`: Contains the React application for the user interface.
-- `shared/`: Contains shared utilities and configurations.
-- `docs/`: Contains API documentation and user guides.
+- `backend/`: Contains the backend server code, including API endpoints, business logic, and database interactions. Key frameworks include Flask for the web server and SQLAlchemy for ORM.
+- `frontend/`: Contains the frontend code, including React components, state management, and API calls. Key frameworks include React, Redux, and Axios.
+- `shared/`: Contains shared utilities and helper functions used by both the backend and frontend.
+- `docs/`: Contains documentation, including API documentation and user guides.
 
 ## Installation & Setup
 
 ### Backend Setup
 1. Clone the repository: `git clone <url>`
-2. Navigate to the project: `cd employee-leave-management`
-3. Create virtual environment: `mvn clean install`
-4. Install dependencies: `mvn spring-boot:run`
+2. Navigate to the project: `cd project-name`
+3. Create virtual environment: `python -m venv venv`
+4. Activate: `source venv/bin/activate` (Linux/Mac) or `venv\Scripts\activate` (Windows)
+5. Install dependencies: `pip install -r requirements.txt`
+6. Create a `.env` file in the backend directory with the following content:
+    ```plaintext
+    SECRET_KEY=your_secret_key
+    SQLALCHEMY_DATABASE_URI=postgresql://username:password@localhost:5432/leave_db
+    ```
 
 ### Frontend Setup
 1. Navigate to frontend: `cd frontend`
@@ -41,40 +45,39 @@ The repository layout is as follows, reflecting the architecture design:
 ## Configuration
 
 ### Required Environment Variables
-- `SPRING_DATASOURCE_URL`: Controls the PostgreSQL database connection URL, format: `jdbc:postgresql://localhost:5432/leave_management`.
-- `SPRING_DATASOURCE_USERNAME`: Controls the PostgreSQL username, format: `example_user`.
-- `SPRING_DATASOURCE_PASSWORD`: Controls the PostgreSQL password, format: `example_password`.
+- `SECRET_KEY`: Controls the secret key used for session management and CSRF protection. Format: string, Example value: `your_secret_key`.
+- `SQLALCHEMY_DATABASE_URI`: Controls the database connection string. Format: string, Example value: `postgresql://username:password@localhost:5432/leave_db`.
 
 ### Optional Environment Variables
-- `JWT_SECRET` (default: `my_secret_key`): Controls the JWT secret key used for token generation.
+- `PORT` (default: `5000`): Controls the port on which the backend server runs.
 
 ## Running the Application
 
 ### Starting the Backend
-1. Ensure Maven is installed and the project is built: `mvn clean install`
-2. Set environment variables: `export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/leave_management`
-3. Start server: `mvn spring-boot:run`
-4. Verify: Backend is running on http://localhost:8080
+1. Ensure virtual environment is activated
+2. Set environment variables: `export VAR=value`
+3. Start server: `python app.py`
+4. Verify: Backend is running on http://localhost:5000
 
 ### Starting the Frontend
 1. Navigate to frontend directory: `cd frontend`
 2. Start dev server: `npm run dev`
-3. Open browser: http://localhost:3000
+3. Open browser: http://localhost:3000 (or displayed URL)
 4. Verify: UI loads and connects to backend
 
 ## Verification Checklist
 - [ ] Backend health check responds at GET /api/health with 200 OK
 - [ ] Frontend loads without console errors
-- [ ] Basic workflow completes end-to-end (e.g., Submit and approve a leave request)
+- [ ] Basic workflow completes end-to-end (e.g., employee submits a leave request and manager approves it)
 - [ ] API endpoints respond with expected data format
 
 ## Troubleshooting
 
 ### Backend Issues
-- **Port already in use**: Change PORT env var or kill process on port 8080
-- **Module not found**: Run `mvn clean install` again
-- **Database connection error**: Verify connection string in application.properties, check service is running
-- **Authentication error**: Verify JWT secret in application.properties is correct
+- **Port already in use**: Change PORT env var or kill process on port 5000
+- **Module not found**: Run `pip install -r requirements.txt` again
+- **Database connection error**: Verify connection string in.env, check service is running
+- **Authentication error**: Verify API keys/tokens in.env are correct and not expired
 
 ### Frontend Issues
 - **Blank page or won't load**: Check browser console for errors, ensure backend is running
@@ -84,21 +87,22 @@ The repository layout is as follows, reflecting the architecture design:
 
 ## Common Workflows
 
-### Submit Leave Request
-1. Navigate to the leave request form.
-2. Fill in the leave details (employee ID, leave type, start date, end date).
-3. Click submit.
-4. Verify: Leave request is created with status "PENDING".
+### Employee Submits Leave Request
+1. Employee logs in and navigates to the leave request page.
+2. Employee fills out the leave request form with details such as leave type, start date, end date, and reason.
+3. Employee submits the form.
+4. The leave request is sent to the manager for approval.
 
-### Approve Leave Request
-1. Navigate to the leave request details.
-2. Click approve and provide a comment.
-3. Verify: Leave request status is updated to "APPROVED".
+### Manager Approves/Rejects Leave Request
+1. Manager logs in and navigates to the leave requests page.
+2. Manager views the pending leave requests.
+3. Manager selects a leave request and approves or rejects it.
+4. The employee is notified of the approval or rejection via email.
 
 ## Deployment Notes
-- Ensure environment variables are set correctly in the production environment.
-- Use a secure method for managing secrets, such as environment variables or a secrets manager.
-- Configure load balancers and scaling for high availability.
+- Ensure secrets management is handled securely, e.g., using environment variables or secret management tools.
+- Configure scaling for the backend server to handle increased load during peak usage times.
+- Set up a CI/CD pipeline for automated testing and deployment.
 
 ## Getting Help
 - Check logs: Backend logs in console, frontend logs in browser DevTools
