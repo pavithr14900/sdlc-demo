@@ -4,32 +4,34 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Entity
 public class LeaveRequest {
 
     @Id
-    @GeneratedValue
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
+    @ManyToOne
+    @JoinColumn(name = "leave_type_id", nullable = false)
+    private LeaveType leaveType;
+
     @NotNull
-    @PastOrPresent(message = "Start date must not be in the future")
+    @PastOrPresent
     private LocalDate startDate;
 
     @NotNull
-    @FutureOrPresent(message = "End date must not be in the past")
+    @FutureOrPresent
     private LocalDate endDate;
 
     @NotNull
-    @Size(min = 1, max = 10)
-    private String status;
+    @Column(nullable = false)
+    private String status = "Pending";
 
     @Column(updatable = false)
     private LocalDate createdAt = LocalDate.now();

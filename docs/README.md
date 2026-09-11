@@ -1,108 +1,111 @@
 # README / Setup Guide
 
 ## Overview
-This document provides a comprehensive guide for setting up and running the employee leave application for our organization. The application allows employees to submit leave requests, managers to approve or reject these requests, and HR to monitor the overall leave status of employees. The core benefits of this application include streamlined leave management, improved transparency, and reduced administrative overhead. The target users are employees, managers, and HR personnel within the organization.
+This application is designed to manage employee leave requests within an organization. It allows employees to submit leave applications, view their leave balances, and managers to approve or reject leave requests. The core benefits include streamlined leave management, improved transparency, and reduced administrative overhead.
 
 ## Key Features
-- Employees can submit leave requests with details such as leave type, start date, end date, and reason.
-- Managers can approve or reject leave requests and view the leave status of their team members.
-- HR personnel can monitor the overall leave status of all employees and generate reports.
+- Employees can submit leave applications with details such as leave type, start date, and end date.
+- Employees can view their leave balances and the status of their leave applications.
+- Managers can approve or reject leave applications, ensuring a controlled workflow.
 
 ## Prerequisites
-- Python 3.9+
-- Node.js 16+
+- Java 11+
 - PostgreSQL 13+
-- Docker and Docker Compose
-- A Unix-like operating system (Linux or macOS) or Windows Subsystem for Linux (WSL)
+- Node.js 16+
+- npm 8+
+- Docker (optional for database setup)
 
 ## Project Structure
 The repository layout is as follows:
-
-- `backend/`: Contains the backend server code, including API endpoints, business logic, and database interactions. Key frameworks include Flask for the web server and SQLAlchemy for ORM.
-- `frontend/`: Contains the frontend code, including React components, state management, and API calls. Key frameworks include React, Redux, and Axios.
-- `shared/`: Contains shared utilities and helper functions used by both the backend and frontend.
-- `docs/`: Contains documentation, including API documentation and user guides.
+- backend/: Contains the Spring Boot application with REST controllers, service classes, and repositories.
+- frontend/: Contains the React application with components, services, and API calls.
+- shared/: Contains shared utilities and configurations.
+- docs/: Contains API documentation and user guides.
 
 ## Installation & Setup
 
 ### Backend Setup
 1. Clone the repository: `git clone <url>`
-2. Navigate to the project: `cd project-name`
-3. Create virtual environment: `python -m venv venv`
-4. Activate: `source venv/bin/activate` (Linux/Mac) or `venv\Scripts\activate` (Windows)
-5. Install dependencies: `pip install -r requirements.txt`
-6. Create a `.env` file in the backend directory with the following content:
-    ```plaintext
-    SECRET_KEY=your_secret_key
-    SQLALCHEMY_DATABASE_URI=postgresql://username:password@localhost:5432/leave_db
-    ```
+2. Navigate to the project: `cd employee-leave-application`
+3. Create virtual environment: `mvn clean install`
+4. Start PostgreSQL server using Docker: `docker run --name postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres`
+5. Set environment variables in `src/main/resources/application.properties`:
+   - `spring.datasource.url=jdbc:postgresql://localhost:5432/leave_db`
+   - `spring.datasource.username=postgres`
+   - `spring.datasource.password=mysecretpassword`
+6. Start the backend server: `mvn spring-boot:run`
 
 ### Frontend Setup
 1. Navigate to frontend: `cd frontend`
 2. Install dependencies: `npm install`
 3. Build/prepare assets: `npm run build`
+4. Start the frontend server: `npm start`
+5. Open browser: http://localhost:3000
 
 ## Configuration
 
 ### Required Environment Variables
-- `SECRET_KEY`: Controls the secret key used for session management and CSRF protection. Format: string, Example value: `your_secret_key`.
-- `SQLALCHEMY_DATABASE_URI`: Controls the database connection string. Format: string, Example value: `postgresql://username:password@localhost:5432/leave_db`.
+- `SPRING_DATASOURCE_URL`: The URL of the PostgreSQL database.
+- `SPRING_DATASOURCE_USERNAME`: The username for the PostgreSQL database.
+- `SPRING_DATASOURCE_PASSWORD`: The password for the PostgreSQL database.
 
 ### Optional Environment Variables
-- `PORT` (default: `5000`): Controls the port on which the backend server runs.
+- `JWT_SECRET` (default: `my-jwt-secret`): The secret key used for JWT token signing.
+- `JWT_EXPIRATION` (default: `3600000`): The expiration time of JWT tokens in milliseconds.
 
 ## Running the Application
 
 ### Starting the Backend
-1. Ensure virtual environment is activated
-2. Set environment variables: `export VAR=value`
-3. Start server: `python app.py`
-4. Verify: Backend is running on http://localhost:5000
+1. Ensure PostgreSQL server is running.
+2. Set environment variables in `src/main/resources/application.properties`.
+3. Start the backend server: `mvn spring-boot:run`
+4. Verify: Backend is running on http://localhost:8080
 
 ### Starting the Frontend
 1. Navigate to frontend directory: `cd frontend`
-2. Start dev server: `npm run dev`
-3. Open browser: http://localhost:3000 (or displayed URL)
+2. Start the frontend server: `npm start`
+3. Open browser: http://localhost:3000
 4. Verify: UI loads and connects to backend
 
 ## Verification Checklist
 - [ ] Backend health check responds at GET /api/health with 200 OK
 - [ ] Frontend loads without console errors
-- [ ] Basic workflow completes end-to-end (e.g., employee submits a leave request and manager approves it)
+- [ ] Basic workflow completes end-to-end (e.g., employee submits a leave application and views its status)
 - [ ] API endpoints respond with expected data format
 
 ## Troubleshooting
 
 ### Backend Issues
-- **Port already in use**: Change PORT env var or kill process on port 5000
-- **Module not found**: Run `pip install -r requirements.txt` again
-- **Database connection error**: Verify connection string in.env, check service is running
-- **Authentication error**: Verify API keys/tokens in.env are correct and not expired
+- **Port already in use**: Change PORT env var or kill process on port 8080
+- **Module not found**: Run `mvn clean install` again
+- **Database connection error**: Verify connection string in `application.properties`, check PostgreSQL service is running
+- **Authentication error**: Verify JWT secret and expiration in `application.properties`
 
 ### Frontend Issues
 - **Blank page or won't load**: Check browser console for errors, ensure backend is running
 - **API connection error**: Verify backend URL in config, check CORS settings
-- **Module resolution error**: Delete node_modules and run `npm install` again
+- **Module resolution error**: Delete `node_modules` and run `npm install` again
 - **Build fails**: Ensure Node.js version matches requirements, clear cache: `npm cache clean --force`
 
 ## Common Workflows
 
-### Employee Submits Leave Request
-1. Employee logs in and navigates to the leave request page.
-2. Employee fills out the leave request form with details such as leave type, start date, end date, and reason.
-3. Employee submits the form.
-4. The leave request is sent to the manager for approval.
+### Submit Leave Application
+1. Navigate to the leave application page.
+2. Fill in the leave details (employee ID, leave type, start date, end date).
+3. Click 'Submit'.
+4. Verify: Leave application is submitted and status is 'PENDING'.
 
-### Manager Approves/Rejects Leave Request
-1. Manager logs in and navigates to the leave requests page.
-2. Manager views the pending leave requests.
-3. Manager selects a leave request and approves or rejects it.
-4. The employee is notified of the approval or rejection via email.
+### Approve Leave Application
+1. Navigate to the leave application details page.
+2. Click 'Approve'.
+3. Verify: Leave application status is updated to 'APPROVED'.
 
 ## Deployment Notes
-- Ensure secrets management is handled securely, e.g., using environment variables or secret management tools.
-- Configure scaling for the backend server to handle increased load during peak usage times.
-- Set up a CI/CD pipeline for automated testing and deployment.
+For production deployment, ensure to:
+- Configure environment variables securely.
+- Use a production-ready database.
+- Implement SSL for secure communication.
+- Set up a reverse proxy (e.g., Nginx) for load balancing and SSL termination.
 
 ## Getting Help
 - Check logs: Backend logs in console, frontend logs in browser DevTools

@@ -1,56 +1,72 @@
 import React, { useState } from 'react';
 
 interface LeaveRequest {
-  id: string;
-  employeeId: string;
+  id: number;
+  employeeId: number;
+  leaveTypeId: number;
   startDate: string;
   endDate: string;
   status: string;
 }
 
 const LeaveRequestPanel: React.FC = () => {
-  const [leaveRequest, setLeaveRequest] = useState<LeaveRequest>({
-    id: '',
-    employeeId: '',
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
+  const [newRequest, setNewRequest] = useState<LeaveRequest>({
+    id: 0,
+    employeeId: 0,
+    leaveTypeId: 0,
     startDate: '',
     endDate: '',
-    status: '',
+    status: 'Pending'
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setLeaveRequest(prevState => ({...prevState, [name]: value }));
+    setNewRequest({...newRequest, [name]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission logic here
+    const response = await fetch('/leave-requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newRequest)
+    });
+    const data = await response.json();
+    setLeaveRequests([...leaveRequests, data]);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label>
-        Leave Type:
-        <select name="leaveType" onChange={handleChange}>
-          <option value="SICK">Sick Leave</option>
-          <option value="VACATION">Vacation Leave</option>
-          <option value="MATERNITY">Maternity Leave</option>
-        </select>
-      </label>
-      <label>
-        Start Date:
-        <input type="date" name="startDate" onChange={handleChange} />
-      </label>
-      <label>
-        End Date:
-        <input type="date" name="endDate" onChange={handleChange} />
-      </label>
-      <label>
-        Reason:
-        <textarea name="reason" onChange={handleChange}></textarea>
-      </label>
-      <button type="submit">Submit Request</button>
-    </form>
+    <div>
+      <h1>Leave Request Panel</h1>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Employee ID:</label>
+          <input type="number" name="employeeId" onChange={handleInputChange} required />
+        </div>
+        <div>
+          <label>Leave Type ID:</label>
+          <input type="number" name="leaveTypeId" onChange={handleInputChange} required />
+        </div>
+        <div>
+          <label>Start Date:</label>
+          <input type="date" name="startDate" onChange={handleInputChange} required />
+        </div>
+        <div>
+          <label>End Date:</label>
+          <input type="date" name="endDate" onChange={handleInputChange} required />
+        </div>
+        <button type="submit">Submit</button>
+      </form>
+      <h2>Leave Requests</h2>
+      <ul>
+        {leaveRequests.map(request => (
+          <li key={request.id}>
+            {request.id} - {request.status}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 };
 

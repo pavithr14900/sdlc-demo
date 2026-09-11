@@ -1,31 +1,31 @@
 CREATE TABLE Employee (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     name VARCHAR NOT NULL,
-    email VARCHAR NOT NULL UNIQUE,
+    email VARCHAR NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE Expense (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    employee_id UUID NOT NULL,
-    amount DECIMAL NOT NULL,
-    description VARCHAR NOT NULL,
-    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR DEFAULT 'PENDING',
+CREATE TABLE LeaveType (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR NOT NULL,
+    description VARCHAR,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (employee_id) REFERENCES Employee(id)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE Approval (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    expense_id UUID NOT NULL,
-    approver_id UUID NOT NULL,
-    approved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR DEFAULT 'PENDING',
+CREATE TABLE LeaveRequest (
+    id SERIAL PRIMARY KEY,
+    employee_id BIGINT NOT NULL,
+    leave_type_id BIGINT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    status VARCHAR NOT NULL DEFAULT 'Pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (expense_id) REFERENCES Expense(id),
-    FOREIGN KEY (approver_id) REFERENCES Employee(id)
+    FOREIGN KEY (employee_id) REFERENCES Employee(id),
+    FOREIGN KEY (leave_type_id) REFERENCES LeaveType(id)
 );
+
+CREATE INDEX idx_leave_request_employee ON LeaveRequest(employee_id);
+CREATE INDEX idx_leave_request_leave_type ON LeaveRequest(leave_type_id);
