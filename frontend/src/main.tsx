@@ -1,13 +1,10 @@
 import React from 'react';
-import ReactDOM from'react-dom';
+import ReactDOM from'react-dom/client';
 import LeaveRequestPanel from './components/LeaveRequestPanel';
 
-const App = () => {
-  return (
-    <div>
-      <LeaveRequestPanel />
-    </div>
-  );
-};
-
-ReactDOM.render(<App />, document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+root.render(
+  <React.StrictMode>
+    <LeaveRequestPanel />
+  </React.StrictMode>
+);

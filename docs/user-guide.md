@@ -1,116 +1,156 @@
 # User Guide
 
 ## Overview
-Employees use this application to submit leave requests, view their leave balances, and track the status of their leave applications. It solves the problem of manual leave management by providing a streamlined, automated process. With this application, employees can easily submit leave requests, managers can approve or reject them, and employees can view their leave balances and the status of their applications.
+The Enterprise Procurement and Inventory Management Platform is designed for a retail organization operating across India, with 150 stores, 12 warehouses, 2,000 suppliers, and 10,000 employees. This platform aims to streamline the procurement process, manage inventory, and ensure efficient financial operations. It solves problems such as duplicate purchases, budget overruns, stock shortages, delayed payments, and limited audit visibility by providing a centralized system for managing the complete procurement lifecycle.
 
 ## Getting Started
-1. **Login**: Employees should log in using their credentials.
-2. **Submit Leave Application**: Navigate to the leave application section and fill out the required fields.
-3. **Verify Success**: After submission, employees should see a confirmation message with the leave application ID and status.
+1. **Login**: Access the platform using your credentials.
+2. **Navigate to Dashboard**: View an overview of pending tasks, budget status, and recent activities.
+3. **Verify Success**: Ensure you see your role-specific dashboard with relevant information.
 
 ## User Roles and Permissions
 
-### Employee
-- **Capabilities**: Submit leave applications, view leave balances, view leave application status.
-- **Typical workflows**: Submit a leave application, view leave balance, check leave application status.
-- **Restrictions**: Cannot approve or reject leave applications.
+### Store Requester
+- **Capabilities**: Create and track purchase requests.
+- **Typical workflows**: Submit a new purchase requisition, track the status of submitted requisitions.
+- **Restrictions**: Cannot approve their own requests.
 
-### Manager
-- **Capabilities**: Approve or reject leave applications.
-- **Typical workflows**: Review leave applications, approve or reject them.
-- **Restrictions**: Cannot submit leave applications on behalf of employees.
+### Store Manager
+- **Capabilities**: Approve purchase requests and monitor store budgets.
+- **Typical workflows**: Review and approve requisitions, monitor budget usage.
+- **Restrictions**: Cannot approve requisitions they created.
+
+### Procurement Officer
+- **Capabilities**: Manage quotations, suppliers, and purchase orders.
+- **Typical workflows**: Request quotations from suppliers, compare and select quotations, issue purchase orders.
+- **Restrictions**: Cannot approve requisitions they created.
+
+### Warehouse Operator
+- **Capabilities**: Receive goods and process stock transfers.
+- **Typical workflows**: Record received goods, update inventory levels, process stock transfers.
+- **Restrictions**: Cannot approve requisitions they created.
+
+### Finance Officer
+- **Capabilities**: Verify invoices and schedule payments.
+- **Typical workflows**: Review and approve invoices, schedule payments to suppliers.
+- **Restrictions**: Cannot approve requisitions they created.
+
+### Finance Director
+- **Capabilities**: Approve high-value purchases and budget exceptions.
+- **Typical workflows**: Review and approve high-value requisitions, approve budget exceptions.
+- **Restrictions**: Cannot approve requisitions they created.
 
 ## Core Workflows
 
-### Submit Leave Application
-This workflow allows employees to submit a leave application.
+### Submit a Purchase Requisition
+**What this workflow accomplishes and when you'd use it**: Create and submit a purchase requisition for approval.
 
 **Steps:**
-1. Navigate to the "Leave Application" section by clicking on the menu.
-2. Click the "Submit Leave" button to open the leave application form.
-3. Enter fields with values like:
-   - `employeeId`: `1`
-   - `leaveType`: `SICK`
-   - `startDate`: `2023-10-01`
-   - `endDate`: `2023-10-05`
-4. Click the "Submit" button to submit the leave application.
-5. **Expected outcome**: A confirmation message with the leave application ID and status.
+1. Navigate to the **Requisitions** section.
+2. Click **Create Requisition** to open the requisition form.
+3. Enter **Product ID, Quantity, Estimated Price, Delivery Date, Delivery Location, Cost Centre, Business Justification**.
+4. Click **Submit** to send the requisition for approval.
+5. **Expected outcome**: Requisition is submitted successfully and appears in the submitted requisitions list.
 
 **Common mistakes:**
-- **Invalid employee ID**: Ensure the employee ID is valid and exists in the system.
-- **Invalid leave type**: Ensure the leave type is one of "SICK", "VACATION", "PERSONAL".
+- **Incorrect Product ID**: Ensure the product ID is valid and exists in the system.
+- **Invalid Quantity**: Ensure the quantity is a positive integer.
 
-### Retrieve Leave Application Details
-This workflow allows employees to view the details of their leave applications.
-
-**Steps:**
-1. Navigate to the "Leave Application" section by clicking on the menu.
-2. Click on the leave application ID to view details.
-3. **Expected outcome**: The leave application details, including ID, employee ID, leave type, start date, end date, and status.
-
-**Tips:**
-- Use the search bar to quickly find a specific leave application.
-- Click the refresh button to update the leave application status.
-
-### Get Employee Leave Balance
-This workflow allows employees to view their leave balances.
+### Approve a Purchase Requisition
+**What this workflow accomplishes and when you'd use it**: Approve or reject a submitted purchase requisition.
 
 **Steps:**
-1. Navigate to the "Leave Balance" section by clicking on the menu.
-2. Enter the employee ID.
-3. Click the "Get Balance" button.
-4. **Expected outcome**: The leave balance for the specified employee ID.
+1. Navigate to the **Requisitions** section.
+2. Click on the **Pending Approvals** tab.
+3. Select the requisition to review.
+4. Click **Approve** or **Reject** and provide comments if necessary.
+5. **Expected outcome**: The requisition status is updated to Approved or Rejected.
 
 **Tips:**
-- Use the dropdown menu to select the leave type.
-- Click the refresh button to update the leave balance.
+- **Use the calendar**: Select delivery dates using the calendar widget.
+- **Attach documents**: Use the attachment field to upload supporting documents.
+
+### Generate a Purchase Order
+**What this workflow accomplishes and when you'd use it**: Create a purchase order from an approved requisition.
+
+**Steps:**
+1. Navigate to the **Requisitions** section.
+2. Select an approved requisition.
+3. Click **Generate Purchase Order**.
+4. Review and confirm the purchase order details.
+5. Click **Create Purchase Order**.
+6. **Expected outcome**: Purchase order is created and sent to the supplier.
+
+**Tips:**
+- **Check stock levels**: Ensure sufficient stock levels before generating a purchase order.
+- **Verify supplier details**: Confirm supplier details are correct before creating the purchase order.
 
 ## Data Management
 
 ### Creating Records
-To create a new leave application record, employees should navigate to the "Leave Application" section and fill out the required fields. Validation rules include ensuring the employee ID is valid, the leave type is one of "SICK", "VACATION", "PERSONAL", and the end date is after the start date.
+**How to create a new record, validation rules, required fields**:
+- Navigate to the relevant section (e.g., **Users**, **Requisitions**).
+- Click **Create** to open the form.
+- Enter required fields (e.g., **Name**, **Role**, **Product ID**).
+- Click **Submit** to create the record.
+- **Validation rules**: Ensure all required fields are filled and valid.
 
 ### Editing Records
-Editing records is not supported in this application. Employees can only submit new leave applications or view existing ones.
+**How to modify existing records, who can edit what**:
+- Navigate to the relevant section.
+- Select the record to edit.
+- Click **Edit** to open the form.
+- Modify the required fields.
+- Click **Save** to update the record.
+- **Permissions**: Only users with appropriate roles can edit records.
 
 ### Deleting Records
-Deleting records is not supported in this application. Leave applications are managed through approval or rejection workflows.
+**Deletion process, any cascading effects, recovery options**:
+- Navigate to the relevant section.
+- Select the record to delete.
+- Click **Delete** and confirm the action.
+- **Cascading effects**: Deleting a record may affect related records (e.g., deleting a user may remove their requisitions).
+- **Recovery options**: Use the **Recycle Bin** to restore deleted records.
 
 ### Filtering and Search
-Employees can filter and search leave applications by employee ID, leave type, and status. The search bar allows for quick lookup of specific leave applications.
+**How to find records using filters and search**:
+- Use the **Filter** option to narrow down records by criteria (e.g., **Status**, **Date**).
+- Use the **Search** bar to find records by keywords (e.g., **Product Name**, **User Name**).
 
 ## Reports and Exports
-This application does not provide reports or exports. Employees can view their leave balances and application status directly in the application.
+**What reports are available, how to generate them, export formats**:
+- Navigate to the **Reports** section.
+- Select the desired report (e.g., **Purchase Requisitions**, **Inventory Levels**).
+- Configure the report parameters (e.g., **Date Range**, **Location**).
+- Click **Generate** to create the report.
+- **Export formats**: Available formats include CSV and Excel.
 
 ## Frequently Asked Questions
 
-**Q: Can I submit a leave application for a future date?**
-A: Yes, you can submit a leave application for a future date. Ensure the end date is after the start date.
+**Q: Can I create multiple requisitions at once?**
+A: Yes, you can create multiple requisitions by adding multiple products to a single requisition form.
 
-**Q: What happens if my leave application is rejected?**
-A: If your leave application is rejected, you will receive a notification with the reason for rejection. You can resubmit the leave application with corrected information.
+**Q: How do I track the status of my requisitions?**
+A: Navigate to the **Requisitions** section and view the status of your requisitions in the list.
 
-**Q: Can I view my leave balance in different leave types?**
-A: Yes, you can view your leave balance for different leave types by selecting the leave type in the "Leave Balance" section.
+**Q: Can I edit a requisition after it has been submitted?**
+A: Yes, you can revise a requisition by clicking the **Revise** button and making the necessary changes.
 
 ## Troubleshooting
 
 ### Common Issues
-- **Issue 1**: Leave application not submitted.
-  - **How to diagnose**: Check the input fields for errors.
-  - **How to fix**: Ensure all required fields are filled out correctly.
-- **Issue 2**: Leave balance not updating.
-  - **How to diagnose**: Check the leave application status.
-  - **How to fix**: Ensure the leave application has been approved.
+- **Requisition not submitting**: Ensure all required fields are filled and valid.
+- **Approval not received**: Check the approval workflow and ensure the approver has access to the requisition.
+- **Invoice not matching**: Verify the quantities, prices, and taxes match the purchase order and goods receipt.
 
 ### Performance Tips
-- Ensure the database is properly indexed to speed up queries.
-- Use caching for frequently accessed data to improve performance.
+- **Use filters**: Narrow down the list of records to improve performance.
+- **Limit search terms**: Use specific keywords to find records quickly.
 
 ## Best Practices
-- Always validate input data to prevent errors.
-- Use parameterized queries to prevent SQL injection.
-- Implement rate limiting to prevent API abuse.
+- **Regularly review budgets**: Ensure budget allocations are accurate and up-to-date.
+- **Monitor stock levels**: Keep track of inventory to prevent stock shortages.
+- **Use approval workflows**: Ensure requisitions are reviewed and approved by the appropriate personnel.
 
 ## Getting Help
 - **In-app help**: Click the? icon for contextual help.

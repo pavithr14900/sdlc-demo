@@ -1,64 +1,61 @@
 # Release Notes
 
 ## Version 1.0.0 - Initial Release
-**Release Date**: 2023-10-01  
+**Release Date**: 2023-10-01
 **Status**: Stable
 
 ### Summary
-This release introduces the Employee Leave Application system, designed to streamline the process of submitting, approving, and tracking leave requests within the organization. The system includes a user-friendly interface for employees to submit leave applications, view their leave balances, and track the status of their leave requests. The backend is built using Spring Boot, with a PostgreSQL database for persistence, and Spring Security for authentication and authorization.
+This release introduces the Enterprise Procurement and Inventory Management Platform for a retail organization operating across India. The platform manages the complete procurement lifecycle from identifying purchasing needs through supplier selection, purchase approval, delivery, inventory updates, invoice verification, and payment reconciliation. It supports multiple user roles, configurable approval workflows, budget controls, and integrates with external systems for a seamless procurement experience.
 
 ### New Features
-- **Employee Leave Application Submission**: Employees can submit leave applications through a user-friendly interface. This feature enables employees to request leave without needing to go through a manual process.
-- **Leave Application Approval Workflow**: Managers can approve or reject leave applications through the system. This feature streamlines the approval process and ensures that leave requests are handled efficiently.
-- **Leave Balance Tracking**: Employees can view their leave balances and track the status of their leave requests. This feature provides transparency and helps employees plan their leave more effectively.
+- **Users and Access**: Support for multiple user roles with role-based access control. Users cannot approve their own requests.
+- **Purchase Requisitions**: Ability to create, save, submit, and track purchase requisitions with multiple products, quantities, and delivery details.
+- **Configurable Approval Workflows**: Approval workflows based on requisition value, with escalation rules and budget-exception approvals.
 
 ### Core Capabilities Delivered
-- **RESTful API Endpoints**: The system includes RESTful API endpoints for leave application submission, retrieval, approval, rejection, and leave balance tracking.
-- **Database Schema**: The system includes a PostgreSQL database schema with tables for employees and leave requests.
-- **Security**: The system includes authentication and authorization using Spring Security, with JWT-based authentication and role-based access control.
+- **Organisation and Master Data**: Management of legal entities, regions, stores, warehouses, cost centres, financial years, product categories, products, units of measure, suppliers, and category budgets.
+- **Budget Controls**: Tracking of allocated, reserved, committed, spent, and available budget by cost centre, category, and financial year.
+- **Supplier Onboarding and Quotation Management**: Supplier registration, quotation requests, and comparison.
 
 ### Improvements & Polish
-- **Input Validation**: All inputs are validated against expected formats and constraints using Spring's `@Valid` annotation and custom validators.
-- **SQL Injection Prevention**: Parameterized queries and Spring Data JPA are used to prevent SQL injection.
-- **UI Refinement**: The user interface has been refined to provide a better user experience.
+- **UI Refinement**: Improved user interface for better navigation and usability.
+- **Performance**: Optimized database queries for faster response times.
 
 ### Known Issues & Limitations
-- **Limited Leave Types**: Currently, only "SICK", "VACATION", and "PERSONAL" leave types are supported. Additional leave types will be added in future releases.
-- **Performance**: The system handles up to 1000 records efficiently.
+- **Limited Supplier Performance Metrics**: Only basic performance scores are implemented. Will be expanded in future releases.
+- **Performance**: Handles up to 2,000 concurrent users and 50,000 requisitions per month.
 
 ### Breaking Changes
 - **None**
 
 ### Compatibility
-- **Requires**: Java 11, PostgreSQL 13, Spring Boot 2.5.4
-- **Tested on**: Windows 10, macOS 11, Ubuntu 20.04
+- Requires: Java 21, Spring Boot, PostgreSQL, AWS
+- Tested on: Windows 10, macOS, Linux, Chrome, Firefox, Edge
 
 ### Upgrade Notes
 To deploy this release:
 1. Back up the database
 2. Pull the latest code: `git pull origin main`
-3. Install/update dependencies: `mvn clean install`
-4. Run migrations if any: `mvn flyway:migrate`
+3. Install/update dependencies: `pip install -r requirements.txt && npm install`
+4. Run migrations if any: `python migrate.py`
 5. Restart services
-6. Verify health: `curl http://localhost:8080/actuator/health`
+6. Verify health: `curl http://localhost:5000/api/health`
 
 ### Contributors
-- **John Doe**: Lead Developer
-- **Jane Smith**: UI/UX Designer
-- **Alex Johnson**: Security Consultant
+- **Team A**: Backend development and API design
+- **Team B**: Frontend development and UI design
 
 ### What's Next
 
 #### Planned for Version 1.1
-- **Additional Leave Types**: Support for additional leave types such as "MATERNITY" and "PATERNITY".
-- **Leave Carry Forward**: Implement leave carry forward functionality.
-- **Performance Improvement**: Optimize database queries for better performance.
+- **Advanced Supplier Performance Metrics**: Implementation of detailed supplier performance metrics.
+- **Enhanced Reporting**: Additional reporting features and filters.
 
 #### Future Roadmap
-- **Integration with HR System**: Integrate with the organization's HR system for leave data synchronization.
-- **Mobile Application**: Develop a mobile application for leave management.
+- **Mobile App**: Development of a mobile application for on-the-go procurement.
+- **Integration with ERP**: Deeper integration with the organization's existing ERP system.
 
 ### Feedback & Support
-- **Report issues**: [GitHub Issues](https://github.com/org/employee-leave-app/issues)
-- **Request features**: [GitHub Issues](https://github.com/org/employee-leave-app/issues)
-- **Documentation**: See [README.md](https://github.com/org/employee-leave-app/blob/main/README.md), [User Guide](https://github.com/org/employee-leave-app/blob/main/docs/user-guide.md), and [API Documentation](https://github.com/org/employee-leave-app/blob/main/docs/api-docs.md)
+- Report issues: [GitHub Issues](https://github.com/org/repo/issues)
+- Request features: [GitHub Issues](https://github.com/org/repo/issues)
+- Documentation: See README.md, User Guide, and API Documentation
