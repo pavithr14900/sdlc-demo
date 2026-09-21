@@ -2,18 +2,22 @@ import React, { useState } from'react';
 
 interface Expense {
   id: string;
+  employeeId: string;
   amount: number;
   description: string;
   date: string;
+  status: string;
 }
 
 const ExpensePanel: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [newExpense, setNewExpense] = useState<Expense>({
     id: '',
+    employeeId: '',
     amount: 0,
     description: '',
-    date: ''
+    date: '',
+    status: 'SUBMITTED'
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -23,8 +27,16 @@ const ExpensePanel: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // API call to submit expense
     setExpenses([...expenses, newExpense]);
-    setNewExpense({ id: '', amount: 0, description: '', date: '' });
+    setNewExpense({
+      id: '',
+      employeeId: '',
+      amount: 0,
+      description: '',
+      date: '',
+      status: 'SUBMITTED'
+    });
   };
 
   return (
@@ -32,24 +44,28 @@ const ExpensePanel: React.FC = () => {
       <h1>Submit Expense</h1>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Date</label>
+          <label>Expense Date</label>
           <input type="date" name="date" value={newExpense.date} onChange={handleInputChange} required />
+        </div>
+        <div>
+          <label>Expense Description</label>
+          <input type="text" name="description" value={newExpense.description} onChange={handleInputChange} required />
         </div>
         <div>
           <label>Amount</label>
           <input type="number" name="amount" value={newExpense.amount} onChange={handleInputChange} required />
         </div>
         <div>
-          <label>Description</label>
-          <textarea name="description" value={newExpense.description} onChange={handleInputChange} required />
+          <label>Receipt</label>
+          <input type="file" name="receipt" onChange={handleInputChange} />
         </div>
-        <button type="submit">Submit</button>
+        <button type="submit">Submit Expense</button>
       </form>
       <h2>Submitted Expenses</h2>
       <ul>
         {expenses.map(expense => (
           <li key={expense.id}>
-            {expense.date} - {expense.amount} - {expense.description}
+            {expense.description} - ${expense.amount} - {expense.date} - {expense.status}
           </li>
         ))}
       </ul>

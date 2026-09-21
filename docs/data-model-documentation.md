@@ -1,230 +1,257 @@
 # Data Model Documentation
 
 ## Overview
-The application manages the procurement and inventory lifecycle for a retail organization operating across India, with 150 stores, 12 warehouses, 2,000 suppliers, and 10,000 employees. The system handles the complete process from identifying a purchasing need through supplier selection, purchase approval, delivery, inventory updates, invoice verification, and payment reconciliation.
 
-The system manages the following core domains:
-- Procurement: Manages purchase requisitions, approvals, and purchase orders.
-- Inventory: Tracks inventory levels, stock transfers, and goods receipts.
-- Budgets: Monitors budget allocations, reservations, and spending.
-- Suppliers: Manages supplier onboarding, quotations, and invoices.
-- Payments: Handles payment processing and reconciliation.
+The application manages the following core domains:
+- Employee: Manages employee details and their submitted expenses and travel requests.
+- Expense: Tracks submitted expenses, their approval status, and reimbursement details.
+- Approval: Manages the approval process for expenses and travel requests by managers.
+- Manager: Manages manager details and their approval actions.
+- Finance: Manages finance details and policy compliance checks.
+- Reimbursement: Tracks reimbursement details for approved expenses.
+- Policy: Defines corporate policies and their thresholds.
+- Audit: Maintains audit history for all actions on expenses and travel requests.
+- Notification: Manages notifications sent to employees regarding their expenses and travel requests.
+- Role: Manages roles and their associated permissions.
+- UserRole: Associates users with their roles.
+- ApprovalThreshold: Defines approval thresholds for different roles.
 
 ## Entity Relationship Diagram
-```plaintext
-[Users] ---- N:1 ---- [PurchaseRequisitions]
-    |
-    | 1:N
-    |
-[Stores] ---- N:1 ---- [PurchaseRequisitions]
-    |
-    | 1:N
-    |
-[CostCenters] ---- N:1 ---- [PurchaseRequisitions]
-    |
-    | 1:N
-    |
-[FinancialYears] ---- N:1 ---- [PurchaseRequisitions]
-    |
-    | 1:N
-    |
-[Products] ---- N:1 ---- [PurchaseRequisitionLines]
-    |
-    | 1:N
-    |
-[PurchaseRequisitions] ---- 1:N ---- [PurchaseOrders]
-    |
-    | 1:N
-    |
-[PurchaseOrders] ---- 1:N ---- [GoodsReceipts]
-    |
-    | 1:N
-    |
-[GoodsReceipts] ---- 1:N ---- [Inventory]
-    |
-    | 1:N
-    |
-[PurchaseOrders] ---- 1:N ---- [Invoices]
-    |
-    | 1:N
-    |
-[Invoices] ---- 1:N ---- [Payments]
+
+```
+[Employee] ---- 1:N ---- [Expense]
+[Employee] ---- 1:N ---- [Approval]
+[Employee] ---- 1:N ---- [Notification]
+[Employee] ---- 1:N ---- [UserRole]
+[Expense] ---- 1:1 ---- [Approval]
+[Expense] ---- 1:1 ---- [Reimbursement]
+[Approval] ---- 1:1 ---- [Manager]
+[Manager] ---- N:1 ---- [Approval]
+[Policy] ---- 1:1 ---- [ApprovalThreshold]
+[Role] ---- 1:N ---- [UserRole]
+[Role] ---- 1:1 ---- [ApprovalThreshold]
 ```
 
 ## Entities
 
-### Users
-**Purpose**: Represents users with different roles in the procurement and inventory management process.
-**Table/Collection Name**: `Users`
+### Employee
+**Purpose**: Represents an employee who submits expenses and travel requests.
+**Table/Collection Name**: `Employee`
 
 **Fields:**
 | Field Name | Type | Required | Constraints | Description |
 |------------|------|----------|-------------|-------------|
 | `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
-| `username` | String | Yes | Max 255 chars, unique | Username of the user |
-| `password` | String | Yes | Min 8 chars | Password of the user |
-| `role` | String | Yes | Must be one of predefined roles | Role of the user |
-| `created_at` | Timestamp | Yes | Auto-set on create | Record creation time |
-| `updated_at` | Timestamp | Yes | Auto-set on create/update | Last modification time |
+| `name` | VARCHAR | Yes | Max 255 chars | Employee name |
+| `email` | VARCHAR | Yes | Max 255 chars, unique | Employee email |
+| `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
+| `updated_at` | TIMESTAMP | Yes | Auto-set on create/update | Last modification time |
 
 **Relationships:**
-- Has many `PurchaseRequisitions` (1:N): Inverse via `PurchaseRequisitions.user_id`
+- Has many `Expense` (1:N): Inverse via `Expense.employee_id`
+- Has many `Approval` (1:N): Inverse via `Approval.employee_id`
+- Has many `Notification` (1:N): Inverse via `Notification.employee_id`
+- Has many `UserRole` (1:N): Inverse via `UserRole.user_id`
 
 **Validation Rules:**
-- `username` must be non-empty and unique across all records
-- `password` must be at least 8 characters long
+- `email` must be non-empty and unique across all records
 
-### PurchaseRequisitions
-**Purpose**: Represents a request for purchasing goods or services.
-**Table/Collection Name**: `PurchaseRequisitions`
+### Expense
+**Purpose**: Represents an expense submitted by an employee.
+**Table/Collection Name**: `Expense`
 
 **Fields:**
 | Field Name | Type | Required | Constraints | Description |
 |------------|------|----------|-------------|-------------|
 | `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
-| `user_id` | UUID | Yes | Foreign key to Users | User who created the requisition |
-| `store_id` | UUID | Yes | Foreign key to Stores | Store requesting the goods |
-| `cost_center_id` | UUID | Yes | Foreign key to CostCenters | Cost center for the requisition |
-| `financial_year_id` | UUID | Yes | Foreign key to FinancialYears | Financial year for the requisition |
-| `status` | String | Yes | Must be one of predefined statuses | Current status of the requisition |
-| `total_value` | DECIMAL | Yes | Must be a positive number | Total value of the requisition |
-| `created_at` | Timestamp | Yes | Auto-set on create | Record creation time |
-| `updated_at` | Timestamp | Yes | Auto-set on create/update | Last modification time |
+| `employee_id` | UUID | Yes | Foreign key to `Employee.id` | Employee who submitted the expense |
+| `amount` | DECIMAL | Yes | > 0 | Expense amount |
+| `description` | VARCHAR | No | Max 255 chars | Expense description |
+| `receipt_url` | VARCHAR | No | Max 500 chars | URL to uploaded receipt |
+| `status` | VARCHAR | Yes | 'PENDING', 'APPROVED', 'REJECTED' | Expense status |
+| `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
+| `updated_at` | TIMESTAMP | Yes | Auto-set on create/update | Last modification time |
 
 **Relationships:**
-- Belongs to `Users` (1:N): Foreign key `user_id` references `Users.id`
-- Belongs to `Stores` (1:N): Foreign key `store_id` references `Stores.id`
-- Belongs to `CostCenters` (1:N): Foreign key `cost_center_id` references `CostCenters.id`
-- Belongs to `FinancialYears` (1:N): Foreign key `financial_year_id` references `FinancialYears.id`
-- Has many `PurchaseRequisitionLines` (1:N): Inverse via `PurchaseRequisitionLines.purchase_requisition_id`
+- Belongs to `Employee` (1:N): Foreign key `employee_id` references `Employee.id`
+- Has one `Approval` (1:1): Inverse via `Approval.expense_id`
+- Has one `Reimbursement` (1:1): Inverse via `Reimbursement.expense_id`
 
 **Validation Rules:**
-- `total_value` must be a positive number
+- `amount` must be greater than 0
+- `receipt_url` must be a valid URL if provided
 
-### PurchaseRequisitionLines
-**Purpose**: Represents a line item within a purchase requisition.
-**Table/Collection Name**: `PurchaseRequisitionLines`
+### Approval
+**Purpose**: Represents the approval process for an expense or travel request.
+**Table/Collection Name**: `Approval`
 
 **Fields:**
 | Field Name | Type | Required | Constraints | Description |
 |------------|------|----------|-------------|-------------|
 | `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
-| `purchase_requisition_id` | UUID | Yes | Foreign key to PurchaseRequisitions | Requisition this line belongs to |
-| `product_id` | UUID | Yes | Foreign key to Products | Product being requested |
-| `quantity` | DECIMAL | Yes | Must be a positive number | Quantity of the product |
-| `estimated_price` | DECIMAL | Yes | Must be a positive number | Estimated price of the product |
-| `required_delivery_date` | DATE | Yes | Must be a valid date | Required delivery date |
-| `delivery_location_id` | UUID | Yes | Foreign key to Stores or Warehouses | Location for delivery |
-| `cost_center_id` | UUID | Yes | Foreign key to CostCenters | Cost center for the line |
-| `business_justification` | String | Yes | Min 5 chars, Max 200 chars | Justification for the request |
-| `attachment` | String | No | Max 255 chars | Attachment for the line |
-| `created_at` | Timestamp | Yes | Auto-set on create | Record creation time |
-| `updated_at` | Timestamp | Yes | Auto-set on create/update | Last modification time |
+| `expense_id` | UUID | No | Foreign key to `Expense.id` | Expense being approved |
+| `manager_id` | UUID | Yes | Foreign key to `Manager.id` | Manager approving the expense |
+| `status` | VARCHAR | Yes | 'APPROVED', 'REJECTED' | Approval status |
+| `comment` | VARCHAR | No | Max 500 chars | Approval comment |
+| `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
 
 **Relationships:**
-- Belongs to `PurchaseRequisitions` (1:N): Foreign key `purchase_requisition_id` references `PurchaseRequisitions.id`
-- Belongs to `Products` (1:N): Foreign key `product_id` references `Products.id`
-- Belongs to `Stores` or `Warehouses` (1:N): Foreign key `delivery_location_id` references `Stores.id` or `Warehouses.id`
-- Belongs to `CostCenters` (1:N): Foreign key `cost_center_id` references `CostCenters.id`
+- Belongs to `Expense` (1:1): Foreign key `expense_id` references `Expense.id`
+- Belongs to `Manager` (1:1): Foreign key `manager_id` references `Manager.id`
 
 **Validation Rules:**
-- `quantity` and `estimated_price` must be positive numbers
-- `required_delivery_date` must be a valid date
+- `comment` must be non-empty if provided
 
-### Products
-**Purpose**: Represents a product that can be purchased.
-**Table/Collection Name**: `Products`
+### Manager
+**Purpose**: Represents a manager who approves expenses and travel requests.
+**Table/Collection Name**: `Manager`
 
 **Fields:**
 | Field Name | Type | Required | Constraints | Description |
 |------------|------|----------|-------------|-------------|
 | `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
-| `sku` | String | Yes | Max 255 chars, unique | SKU of the product |
-| `description` | String | No | Max 255 chars | Description of the product |
-| `category_id` | UUID | Yes | Foreign key to ProductCategories | Category of the product |
-| `unit` | String | Yes | Max 255 chars | Unit of measure for the product |
-| `reorder_level` | DECIMAL | Yes | Must be a positive number | Reorder level for the product |
-| `preferred_supplier_id` | UUID | No | Foreign key to Suppliers | Preferred supplier for the product |
-| `batch_tracking_required` | BOOLEAN | No | Default false | Indicates if batch tracking is required |
-| `expiry_tracking_required` | BOOLEAN | No | Default false | Indicates if expiry tracking is required |
-| `created_at` | Timestamp | Yes | Auto-set on create | Record creation time |
-| `updated_at` | Timestamp | Yes | Auto-set on create/update | Last modification time |
+| `name` | VARCHAR | Yes | Max 255 chars | Manager name |
+| `email` | VARCHAR | Yes | Max 255 chars, unique | Manager email |
+| `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
+| `updated_at` | TIMESTAMP | Yes | Auto-set on create/update | Last modification time |
 
 **Relationships:**
-- Belongs to `ProductCategories` (1:N): Foreign key `category_id` references `ProductCategories.id`
-- Optionally belongs to `Suppliers` (1:N): Foreign key `preferred_supplier_id` references `Suppliers.id`
+- Has many `Approval` (1:N): Inverse via `Approval.manager_id`
 
 **Validation Rules:**
-- `sku` must be non-empty and unique across all records
-- `reorder_level` must be a positive number
+- `email` must be non-empty and unique across all records
 
-## Relationships and Constraints
+### Finance
+**Purpose**: Represents a finance team member who validates policy compliance.
+**Table/Collection Name**: `Finance`
 
-### Foreign Keys
-| From Entity | Field | To Entity | Field | Cardinality | Delete Behavior |
-|-------------|-------|-----------|-------|-------------|-----------------|
-| `Users` | `id` | `PurchaseRequisitions` | `user_id` | 1:N | CASCADE |
-| `Stores` | `id` | `PurchaseRequisitions` | `store_id` | 1:N | CASCADE |
-| `CostCenters` | `id` | `PurchaseRequisitions` | `cost_center_id` | 1:N | CASCADE |
-| `FinancialYears` | `id` | `PurchaseRequisitions` | `financial_year_id` | 1:N | CASCADE |
-| `PurchaseRequisitions` | `id` | `PurchaseRequisitionLines` | `purchase_requisition_id` | 1:N | CASCADE |
-| `Products` | `id` | `PurchaseRequisitionLines` | `product_id` | 1:N | CASCADE |
-| `Stores` | `id` | `PurchaseRequisitionLines` | `delivery_location_id` | 1:N | CASCADE |
-| `CostCenters` | `id` | `PurchaseRequisitionLines` | `cost_center_id` | 1:N | CASCADE |
-| `PurchaseRequisitions` | `id` | `PurchaseOrders` | `purchase_requisition_id` | 1:N | CASCADE |
-| `PurchaseOrders` | `id` | `GoodsReceipts` | `purchase_order_id` | 1:N | CASCADE |
-| `PurchaseOrders` | `id` | `Invoices` | `purchase_order_id` | 1:N | CASCADE |
-| `Invoices` | `id` | `Payments` | `invoice_id` | 1:N | CASCADE |
+**Fields:**
+| Field Name | Type | Required | Constraints | Description |
+|------------|------|----------|-------------|-------------|
+| `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
+| `name` | VARCHAR | Yes | Max 255 chars | Finance name |
+| `email` | VARCHAR | Yes | Max 255 chars, unique | Finance email |
+| `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
+| `updated_at` | TIMESTAMP | Yes | Auto-set on create/update | Last modification time |
 
-### Unique Constraints
-- `Users(username)`: Ensures no duplicate usernames
-- `Products(sku)`: Ensures no duplicate SKUs
+**Validation Rules:**
+- `email` must be non-empty and unique across all records
 
-## Data Validation Rules
+### Reimbursement
+**Purpose**: Represents the reimbursement details for an approved expense.
+**Table/Collection Name**: `Reimbursement`
 
-**Business Rules:**
-- `PurchaseRequisitions.total_value`: Must be a positive number, otherwise raise validation error "Total value must be positive".
-- `PurchaseRequisitionLines.quantity`: Must be a positive number, otherwise raise validation error "Quantity must be positive".
-- `PurchaseRequisitionLines.estimated_price`: Must be a positive number, otherwise raise validation error "Estimated price must be positive".
+**Fields:**
+| Field Name | Type | Required | Constraints | Description |
+|------------|------|----------|-------------|-------------|
+| `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
+| `expense_id` | UUID | Yes | Foreign key to `Expense.id` | Expense being reimbursed |
+| `amount` | DECIMAL | Yes | > 0 | Reimbursement amount |
+| `status` | VARCHAR | Yes | 'PENDING', 'COMPLETED' | Reimbursement status |
+| `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
+| `updated_at` | TIMESTAMP | Yes | Auto-set on create/update | Last modification time |
 
-**Format Rules:**
-- `Users.username`: Must be alphanumeric and between 2 and 50 characters, otherwise raise validation error "Invalid username format".
-- `Products.sku`: Must be alphanumeric and between 1 and 255 characters, otherwise raise validation error "Invalid SKU format".
+**Relationships:**
+- Belongs to `Expense` (1:1): Foreign key `expense_id` references `Expense.id`
 
-## Data Lifecycle
+**Validation Rules:**
+- `amount` must be greater than 0
 
-### Creation
-- A new `User` is created when a new account is registered.
-- Default `status` for `PurchaseRequisitions` is "DRAFT".
-- `created_by` is automatically set to the current user for all entities.
+### Policy
+**Purpose**: Defines corporate policies and their thresholds.
+**Table/Collection Name**: `Policy`
 
-### Updates
-- `User.password` can only be updated by the user themselves.
-- `updated_at` is automatically updated on any modification to a record.
+**Fields:**
+| Field Name | Type | Required | Constraints | Description |
+|------------|------|----------|-------------|-------------|
+| `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
+| `name` | VARCHAR | Yes | Max 255 chars | Policy name |
+| `description` | VARCHAR | No | Max 500 chars | Policy description |
+| `threshold` | DECIMAL | Yes | > 0 | Policy threshold |
+| `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
+| `updated_at` | TIMESTAMP | Yes | Auto-set on create/update | Last modification time |
 
-### Archival / Soft Delete
-- Records are not archived but can be deactivated by setting a `deleted_at` timestamp.
+**Validation Rules:**
+- `threshold` must be greater than 0
 
-## Indexes
-- Primary key: `id`
-- Foreign keys: `user_id`, `store_id`, `cost_center_id`, `financial_year_id`, `purchase_requisition_id`, `product_id`, `delivery_location_id`, `purchase_order_id`, `invoice_id`
-- Search fields: `username`, `sku`
+### Audit
+**Purpose**: Maintains audit history for all actions on expenses and travel requests.
+**Table/Collection Name**: `Audit`
 
-## Example Records
+**Fields:**
+| Field Name | Type | Required | Constraints | Description |
+|------------|------|----------|-------------|-------------|
+| `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
+| `entity_id` | UUID | Yes | Foreign key to `Expense.id` or `TravelRequest.id` | Entity being audited |
+| `entity_type` | VARCHAR | Yes | 'EXPENSE' or 'TRAVEL_REQUEST' | Type of entity |
+| `action` | VARCHAR | Yes | 'SUBMITTED', 'APPROVED', 'REJECTED', etc. | Action performed |
+| `details` | JSONB | No | JSON object | Audit details |
+| `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
 
-### Users
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "username": "johndoe",
-  "password": "encrypted_password",
-  "role": "STORE_REQUESTER",
-  "created_at": "2026-01-15T10:30:00Z",
-  "updated_at": "2026-01-15T10:30:00Z"
-}
-```
+**Validation Rules:**
+- `entity_type` must be one of 'EXPENSE' or 'TRAVEL_REQUEST'
 
-### PurchaseRequisitions
-```json
-{
-  "id": "123e4
+### Notification
+**Purpose**: Manages notifications sent to employees regarding their expenses and travel requests.
+**Table/Collection Name**: `Notification`
+
+**Fields:**
+| Field Name | Type | Required | Constraints | Description |
+|------------|------|----------|-------------|-------------|
+| `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
+| `employee_id` | UUID | Yes | Foreign key to `Employee.id` | Employee receiving notification |
+| `message` | VARCHAR | Yes | Max 500 chars | Notification message |
+| `status` | VARCHAR | Yes | 'PENDING', 'SENT' | Notification status |
+| `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
+| `updated_at` | TIMESTAMP | Yes | Auto-set on create/update | Last modification time |
+
+**Relationships:**
+- Belongs to `Employee` (1:N): Foreign key `employee_id` references `Employee.id`
+
+**Validation Rules:**
+- `message` must be non-empty
+
+### Role
+**Purpose**: Manages roles and their associated permissions.
+**Table/Collection Name**: `Role`
+
+**Fields:**
+| Field Name | Type | Required | Constraints | Description |
+|------------|------|----------|-------------|-------------|
+| `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
+| `name` | VARCHAR | Yes | Max 255 chars | Role name |
+| `description` | VARCHAR | No | Max 500 chars | Role description |
+| `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
+| `updated_at` | TIMESTAMP | Yes | Auto-set on create/update | Last modification time |
+
+**Validation Rules:**
+- `name` must be non-empty
+
+### UserRole
+**Purpose**: Associates users with their roles.
+**Table/Collection Name**: `UserRole`
+
+**Fields:**
+| Field Name | Type | Required | Constraints | Description |
+|------------|------|----------|-------------|-------------|
+| `id` | UUID | Yes | Primary key, auto-generated | Unique identifier |
+| `user_id` | UUID | Yes | Foreign key to `Employee.id` | User associated with the role |
+| `role_id` | UUID | Yes | Foreign key to `Role.id` | Role associated with the user |
+| `created_at` | TIMESTAMP | Yes | Auto-set on create | Record creation time |
+| `updated_at` | TIMESTAMP | Yes | Auto-set on create/update | Last modification time |
+
+**Relationships:**
+- Belongs to `Employee` (1:N): Foreign key `user_id` references `Employee.id`
+- Belongs to `Role` (1:N): Foreign key `role_id` references `Role.id`
+
+**Validation Rules:**
+- Both `user_id` and `role_id` must be non-null and valid
+
+### ApprovalThreshold
+**Purpose**: Defines approval thresholds for different roles.
+**Table/Collection Name**: `ApprovalThreshold`
+
+**Fields:**
+| Field Name | Type | Required | Constraints | Description |
+|------------|------|----------|-------------|-------------|
+| `id` | UUID | Yes | Primary key, auto-generated | Unique identifier

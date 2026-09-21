@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ExpenseService {
@@ -30,17 +31,7 @@ public class ExpenseService {
         expenseRepository.deleteById(id);
     }
 
-    public Expense approveExpense(UUID id) {
-        Expense expense = expenseRepository.findById(id)
-               .orElseThrow(() -> new RuntimeException("Expense not found"));
-        expense.setStatus(Expense.ExpenseStatus.APPROVED);
-        return expenseRepository.save(expense);
-    }
-
-    public Expense rejectExpense(UUID id) {
-        Expense expense = expenseRepository.findById(id)
-               .orElseThrow(() -> new RuntimeException("Expense not found"));
-        expense.setStatus(Expense.ExpenseStatus.REJECTED);
-        return expenseRepository.save(expense);
+    public List<Expense> getExpensesByEmployeeId(UUID employeeId) {
+        return expenseRepository.findByEmployeeId(employeeId);
     }
 }

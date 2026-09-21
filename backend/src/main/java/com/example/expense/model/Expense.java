@@ -2,48 +2,63 @@ package com.example.expense.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.time.LocalDate;
 
 @Entity
 @Data
 public class Expense {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(updatable = false, nullable = false)
-    private UUID id;
+    @UuidGenerator
+    private String id;
 
     @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
+    @DecimalMin(value = "0.01")
     @NotNull
-    @DecimalMin("0.01")
     private BigDecimal amount;
 
-    @NotBlank
+    @NotNull
     private String description;
 
-    @Column(updatable = false)
-    private LocalDateTime submittedAt = LocalDateTime.now();
+    @NotNull
+    private LocalDate date;
+
+    @OneToOne(mappedBy = "expense", cascade = CascadeType.ALL)
+    private Receipt receipt;
+
+    @ManyToOne
+    @JoinColumn(name = "manager_id")
+    private Employee manager;
 
     @Enumerated(EnumType.STRING)
-    private ExpenseStatus status = ExpenseStatus.PENDING;
+    private ExpenseStatus status;
 
-    @Column(updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private String comment;
 
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    @Override
+    public String toString() {
+        return "Expense{" +
+                "id='" + id + '\'' +
+                ", employee=" + employee +
+                ", amount=" + amount +
+                ", description='" + description + '\'' +
+                ", date=" + date +
+                ", receipt=" + receipt +
+                ", manager=" + manager +
+                ", status=" + status +
+                ", comment='" + comment + '\'' +
+                '}';
+    }
 }
 
 enum ExpenseStatus {
-    PENDING, APPROVED, REJECTED
+    SUBMITTED, APPROVED, REJECTED
 }

@@ -1,27 +1,27 @@
 # README / Setup Guide
 
 ## Overview
-This Enterprise Procurement and Inventory Management Platform is designed for a retail organization operating across India, with 150 stores, 12 warehouses, 2,000 suppliers, and 10,000 employees. The platform streamlines the entire procurement process, from identifying purchasing needs through supplier selection, purchase approval, delivery, inventory updates, invoice verification, and payment reconciliation. It aims to eliminate duplicate purchases, budget overruns, stock shortages, delayed payments, and limited audit visibility by providing a centralized, integrated system.
+The Employee Expense & Corporate Travel Management Platform is designed to streamline the process of submitting, approving, and tracking employee expenses and travel requests. This platform benefits employees by simplifying expense and travel request submissions, managers by providing an efficient approval workflow, and finance teams by ensuring policy compliance and generating insightful reports. The target users include employees, managers, and finance personnel within an organization.
 
 ## Key Features
-- **Configurable Approval Workflows**: Automatically route purchase requisitions based on value and category, ensuring appropriate levels of approval.
-- **Budget Controls**: Track and manage budget allocations, reservations, and spending across cost centers, categories, and financial years.
-- **Supplier Onboarding and Quotation Management**: Facilitate supplier registration, quotation requests, and comparison to streamline supplier selection.
-- **Role-Specific Dashboards**: Provide tailored views of pending approvals, budget utilization, purchase status, inventory levels, and more.
+- Employees can submit expenses and travel requests, upload receipts, and track reimbursement status.
+- Managers can approve or reject expenses and travel requests with comments.
+- Finance personnel can validate policy compliance and generate department-wise spend, policy violations, outstanding reimbursements, and monthly cost reports.
+- The system includes configurable approval thresholds, duplicate-claim detection, audit history, notifications, role-based access control (RBAC), and dashboards.
 
 ## Prerequisites
-- Java 21+
-- Spring Boot
-- PostgreSQL
+- Java 11 or higher
 - Node.js 16+
-- npm 8+
-- AWS account for deployment
+- PostgreSQL 13+
+- Docker (for local development)
+- Basic understanding of Spring Boot and React
 
 ## Project Structure
-- backend/: Contains the Spring Boot application, handling business logic, API endpoints, and database interactions.
-- frontend/: React application with TypeScript, providing the user interface and interacting with the backend via REST APIs.
-- shared/: Shared utilities and common code between frontend and backend.
-- docs/: Documentation and project details.
+The repository layout follows a standard microservices architecture with a backend and frontend.
+- backend/: Contains the Spring Boot application with RESTful APIs, business logic, and data access layers.
+- frontend/: Contains the React application for the user interface.
+- shared/: Contains shared utilities and configurations.
+- docs/: Contains API documentation and user guides.
 
 ## Installation & Setup
 
@@ -31,7 +31,9 @@ This Enterprise Procurement and Inventory Management Platform is designed for a 
 3. Create virtual environment: `python -m venv venv`
 4. Activate: `source venv/bin/activate` (Linux/Mac) or `venv\Scripts\activate` (Windows)
 5. Install dependencies: `pip install -r requirements.txt`
-6. Configure PostgreSQL database: Set up a PostgreSQL instance and update the `application.properties` file with the database connection details.
+6. Set up PostgreSQL database: `docker run --name=postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres`
+7. Create database: `createdb expense_db`
+8. Run migrations: `python manage.py migrate`
 
 ### Frontend Setup
 1. Navigate to frontend: `cd frontend`
@@ -41,21 +43,19 @@ This Enterprise Procurement and Inventory Management Platform is designed for a 
 ## Configuration
 
 ### Required Environment Variables
-- `SPRING_DATASOURCE_URL`: Database connection URL (e.g., `jdbc:postgresql://localhost:5432/procurement`)
-- `SPRING_DATASOURCE_USERNAME`: Database username
-- `SPRING_DATASOURCE_PASSWORD`: Database password
-- `JWT_SECRET`: Secret key for JWT token generation
-- `MAIL_USERNAME`: Email provider username for sending notifications
-- `MAIL_PASSWORD`: Email provider password
-- `AWS_ACCESS_KEY_ID`: AWS access key for object storage
-- `AWS_SECRET_ACCESS_KEY`: AWS secret key for object storage
+- `SPRING_DATASOURCE_URL`: Controls the database connection URL, format `jdbc:postgresql://localhost:5432/expense_db`, example value `jdbc:postgresql://localhost:5432/expense_db`.
+- `SPRING_DATASOURCE_USERNAME`: Controls the database username, format `username`, example value `postgres`.
+- `SPRING_DATASOURCE_PASSWORD`: Controls the database password, format `password`, example value `mysecretpassword`.
+
+### Optional Environment Variables
+- `JWT_SECRET` (default: `secret`): Controls the JWT secret key used for authentication.
 
 ## Running the Application
 
 ### Starting the Backend
 1. Ensure virtual environment is activated
-2. Set environment variables: `export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/procurement`
-3. Start server: `mvn spring-boot:run`
+2. Set environment variables: `export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/expense_db`
+3. Start server: `python app.py`
 4. Verify: Backend is running on http://localhost:8080
 
 ### Starting the Frontend
@@ -67,7 +67,7 @@ This Enterprise Procurement and Inventory Management Platform is designed for a 
 ## Verification Checklist
 - [ ] Backend health check responds at GET /api/health with 200 OK
 - [ ] Frontend loads without console errors
-- [ ] Basic workflow completes end-to-end (e.g., create a purchase requisition and track its approval)
+- [ ] Basic workflow completes end-to-end (e.g., employee submits an expense, manager approves it)
 - [ ] API endpoints respond with expected data format
 
 ## Troubleshooting
@@ -75,33 +75,35 @@ This Enterprise Procurement and Inventory Management Platform is designed for a 
 ### Backend Issues
 - **Port already in use**: Change PORT env var or kill process on port 8080
 - **Module not found**: Run `pip install -r requirements.txt` again
-- **Database connection error**: Verify connection string in `application.properties`, check service is running
-- **Authentication error**: Verify API keys/tokens in `.env` are correct and not expired
+- **Database connection error**: Verify connection string in config, check service is running
+- **Authentication error**: Verify JWT secret in.env is correct and not expired
 
 ### Frontend Issues
 - **Blank page or won't load**: Check browser console for errors, ensure backend is running
 - **API connection error**: Verify backend URL in config, check CORS settings
-- **Module resolution error**: Delete `node_modules` and run `npm install` again
+- **Module resolution error**: Delete node_modules and run `npm install` again
 - **Build fails**: Ensure Node.js version matches requirements, clear cache: `npm cache clean --force`
 
 ## Common Workflows
 
-### Create a Purchase Requisition
-1. Navigate to the requisition creation page.
-2. Enter product details, quantities, estimated prices, delivery dates, and justifications.
-3. Submit the requisition for approval.
-4. Verify the requisition appears in the list of submitted requisitions.
+### Employee Submits Expense
+1. Log in as an employee
+2. Navigate to the "Submit Expense" page
+3. Fill in the expense details and upload a receipt
+4. Submit the expense
+5. Verify: Expense is submitted and appears in the "My Expenses" section
 
-### Approve a Purchase Requisition
-1. Navigate to the approval dashboard.
-2. Select a requisition to approve.
-3. Review the details and approve or reject the requisition.
-4. Verify the requisition status updates to "Approved" or "Rejected".
+### Manager Approves Expense
+1. Log in as a manager
+2. Navigate to the "Pending Expenses" section
+3. Select an expense to approve
+4. Provide approval comments and submit
+5. Verify: Expense status changes to "Approved" and appears in the "Approved Expenses" section
 
 ## Deployment Notes
-- Ensure environment variables are securely managed, especially database credentials and API keys.
-- Configure AWS services for database, object storage, and notifications.
-- Set up load balancers and auto-scaling for high availability.
+- Ensure environment variables are set correctly in the production environment.
+- Use a secure method for managing secrets, such as HashiCorp Vault or AWS Secrets Manager.
+- Configure load balancers and auto-scaling for high availability.
 
 ## Getting Help
 - Check logs: Backend logs in console, frontend logs in browser DevTools
